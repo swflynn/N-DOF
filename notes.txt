@@ -2,10 +2,18 @@
 Begin Small, first steps are to get the product between a Gaussian and Hermite Polynomialm (N-Dimensional).
 We then need to integrate this using Sobol Sequences.
 
+What We Need:
+Code to Generate any of the Hermite Polynomials,
+Check to make sure all of the hermite polynomials can be generated
+Multiply your polynomial by the 
+
+
+
+Matrix Elements (Gaussian*Hermite Polynomial)
+Subroutine to compute matrix elements for any 2 harmonic basis functions (and potentials). 
+
 
 Current Questions:
-
-
-
-
-Answers:
+Generate any Hermite Polynomial
+Generte any Harmonic Basis Function
+How do we use sobol numbers to calculate an integral. 
