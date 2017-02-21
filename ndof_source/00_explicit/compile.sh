@@ -1,4 +1,4 @@
 clear
-rm a.out
-gfortran 00_explicit.f95
+rm *.out
+gfortran 00_expl_comment.f95
 ./a.out
