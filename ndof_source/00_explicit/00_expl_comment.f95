@@ -69,4 +69,8 @@ PROGRAM basis00
       values = EXP(-(x**2)*(a+0.5)) 
     END FUNCTION integrand
 
+
+! This calculation works, however the error is very poor, answer from mathematica gives 0.162868. 
+! I will assume mathematica is smarter than this.....
+
 END PROGRAM basis00
