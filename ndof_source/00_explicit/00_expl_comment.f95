@@ -9,6 +9,8 @@
 
 PROGRAM basis00
 
+! set all paramaters to 1 for simplicity
+
   IMPLICIT NONE
   REAL, PARAMETER :: force_const = 1.0, reduc_mass = 1.0, hbar = 1.0
   REAL, PARAMETER :: upper_limit=3.0
