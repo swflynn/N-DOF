@@ -1,10 +1,9 @@
-! We need to start by generating a Hermite Polynomial to study. 
-! To do this I will look for online code.
+! Need to generate the hermite polynomials for the harmonic oscillator wavefunction
 
 PROGRAM hermite_polynomial
+
   IMPLICIT NONE
 
-  INTEGER :: n
 
 
 
