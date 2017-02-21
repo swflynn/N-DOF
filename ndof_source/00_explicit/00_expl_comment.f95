@@ -3,7 +3,7 @@
 ! Harmonic oscialator basis functions. I have already included the
 ! hermite polynomial and simplified the total expression for this
 ! evaluation. 
-! I am evaluating integral with trapezoid rule:
+! I am evaluating the integral using the trapezoid rule:
 ! See http://f90in15minutes.wikidot.com/numerical-integration
 
 
@@ -19,11 +19,9 @@ PROGRAM basis00
   INTEGER, PARAMETER :: step_size=10
   INTEGER :: i
 
+! set our a value, and the constants we pulled out of the integral
   a = ((force_const*reduc_mass)**0.5)/hbar
   coef= (1/pi)* (a/2)**0.5
-
-  !  WRITE (*,*) 'The alpha paramater is ', a 
-!    WRITE (*,*) 'The constant of integration is', coef
 
 ! evaluate our function at #step_size points, to make sure things are working
 ! I may need to insert a cutoff for f(x) = 0 at an upper limit of 10 get
@@ -34,9 +32,34 @@ PROGRAM basis00
      WRITE (*,*) u, integrand(u)
   END DO
 
-  STOP
+  CALL trapezoid_integration(step_size , upper_limit)
+  
+  CONTAINS 
 
-  CONTAINS
+! Function to calculate the integral using trapezoid method 
+
+    SUBROUTINE trapezoid_integration(step_size,upper_limit)
+      IMPLICIT NONE 
+      INTEGER :: step_size
+      REAL :: upper_limit
+      REAL :: integral, u, h
+      INTEGER :: i
+
+      integral = 0.0
+
+      do i=0,step_size
+        u = (upper_limit*i) / step_size
+
+        IF ((i.EQ.0) .OR. (i.EQ.step_size)) THEN
+         integral = integral+(2.0*integrand(u))
+        ENd IF
+      END DO
+
+      h=upper_limit/step_size
+      integral = (h/2.0)*integral* coef
+
+      WRITE (*,*) '#Trapezoid integration = ', integral
+    END SUBROUTINE trapezoid_integration
 
 ! function to calculation x, f(x) values 
     FUNCTION integrand(x) RESULT (values)
