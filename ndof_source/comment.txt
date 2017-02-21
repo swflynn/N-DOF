@@ -1,0 +1,3 @@
+Here are the various source files for the code I am developing.
+While developing things are going to be "disorganized"
+Once things work I will make a "cleaner" repository
