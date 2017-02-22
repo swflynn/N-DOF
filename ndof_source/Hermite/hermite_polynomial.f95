@@ -7,7 +7,6 @@ REAL*8 :: A(0:10)
 REAL*8 :: B(0:10,0:10)
 INTEGER :: degree,k
 
-   PRINT*,' '
    degree = 6
      WRITE(*,25) degree
 
@@ -20,7 +19,9 @@ INTEGER :: degree,k
    print *,' '
 
    stop
-25 format(' Hermite polynomial coefficients for Hermite Polynomial ',i2/)
+
+!Pretty formatting for writing coefficients to screen not necessary
+25 format('Coefficients for Hermite Polynomial ',i2/)
 50 format('   A(',i2,') = ',f10.0)
 
 END PROGRAM HERMITE
