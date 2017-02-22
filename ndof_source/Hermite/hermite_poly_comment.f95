@@ -6,6 +6,7 @@ PROGRAM Hermite
   REAL*8 :: A(0:10)      !Final coeficient for each degree
   REAL*8 :: B(0:10,0:10) 
   INTEGER :: degree,k    !k = dummy
+  CHARACTER :: x
 
    degree = 5             !which Hermite polynomial you want
      WRITE(*,25) degree ! write what degree polynomial you are calculating

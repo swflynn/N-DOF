@@ -13,7 +13,7 @@ PROGRAM Hermite
      CALL Hermite_Coeff(degree,A,B)
 
      DO k = 0, degree
-       WRITE(*,50) k, A(k)  
+       WRITE(*,50) k, A(k)
      END DO 
 
    stop
