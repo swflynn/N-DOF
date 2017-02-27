@@ -7,7 +7,9 @@ PROGRAM Hermite
   REAL*8 :: B(0:10,0:10)
   INTEGER :: degree,k
 
-   degree = 5
+
+     PRINT *, "What degree polynomial would you like to consider"
+     READ (*,*) degree
      WRITE(*,25) degree
 
      CALL Hermite_Coeff(degree,A,B)
