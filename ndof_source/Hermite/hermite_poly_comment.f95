@@ -8,7 +8,8 @@ PROGRAM Hermite
   INTEGER :: degree,k    !k = dummy
   CHARACTER :: x
 
-   degree = 5             !which Hermite polynomial you want
+  PRINT *, "What degree polynomial would you like to consider" 
+  READ (*,*) degree           !which Hermite polynomial you want
      WRITE(*,25) degree ! write what degree polynomial you are calculating
 
      CALL Hermite_Coeff(degree,A,B) ! call fn to generate polynomial
