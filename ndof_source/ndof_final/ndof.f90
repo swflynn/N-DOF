@@ -2,17 +2,21 @@
 ! will put all functions/subroutines within the module, then run this. 
 
 
-PROGRAM main
-  USE ndof_module
+PROGRAM Main
+  USE ndof_mod
   IMPLICIT NONE
 
   REAL*8 :: A(0:10)
   REAL*8 :: B(0:10,0:10)
   INTEGER :: degree,k
 
+  !New Code
+  PRINT *, "What degree polynomial would you like to consider?"
+  READ (*,*) degree
+
   WRITE(*,25) degree
 
-  CALL Hermite_Coeff(5,A,B)
+  CALL Hermite_Coeff(degree,A,B)
 
   DO k = 0, degree
       WRITE(*,50) k, A(k)
@@ -25,4 +29,4 @@ PROGRAM main
 
 
 
-END PROGRAM main
+END PROGRAM Main

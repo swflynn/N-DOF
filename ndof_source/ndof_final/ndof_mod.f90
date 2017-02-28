@@ -1,4 +1,4 @@
-MODULE ndof_module
+MODULE ndof_mod
 
 
 
@@ -43,4 +43,4 @@ MODULE ndof_module
 !=====================================================================!
 
 
-END MODULE ndof_module
+END MODULE ndof_mod
