@@ -1,0 +1,94 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\title{N-DOF Calculation Outline}
+\author{Shane W. Flynn}
+\date{Feburary 19 2017}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{braket}
+
+\begin{document}
+
+\maketitle
+
+\section*{First Calculation}
+For this project I am going to start at the simplest possible step. 
+Mainly, I am going to calculate 
+\begin{equation}
+    \braket{0|G(x)|0}
+\end{equation}
+Here G(x) refers to a Gaussian distribution which we will assume (for now) is centered around 0 and has a standard deviation of 1. 
+\begin{equation}
+    G(x) = \frac{1}{\sqrt{2\pi \sigma^2}}e^{-\frac{(x-a)^2}{2\sigma^2}} \approx \sqrt{\frac{1}{2\pi}}e^{-\frac{x^2}{2}}
+\end{equation}
+The basis functions we are going to use are for the Harmonic Oscilator, we will consider the ground state diagonal element first.
+Using McQuarrie P.225 for reference we find the wavefunctions (in terms of x, not using p, q space). 
+
+\begin{equation}
+    \ket{0} = \left (\frac{\alpha}{\pi}\right )^{\frac{1}{4}}e^{-\frac{\alpha x^2}{2}}
+\end{equation}
+
+Here we note that $\alpha = \frac{\sqrt{k\mu}}{\hbar}$ is always positive with no imaginary component, k is the spring constant and $\mu$ the reduced mass (for the calculation I will set things to 1 most likely, will need to be careful here). 
+
+For the purpose of this first calculation we can simplify to write the integral as follows:
+\begin{equation}
+\begin{split}
+      \braket{0|G(x)|0} =  \left (\frac{\alpha}{\pi}\right )^{\frac{1}{4}} \left (\frac{1}{2\pi}\right )^{\frac{1}{2}}      \left (\frac{\alpha}{\pi}\right )^{\frac{1}{4}} \braket{e^{-\frac{\alpha x^2}{2}}|e^{-\frac{x^2}{2}}|e^{-\frac{\alpha x^2}{2}}} \\
+      = \frac{1}{\pi} \left (\frac{\alpha}{2}\right )^{\frac{1}{2}}\int  e^{-x^2(\alpha+\frac{1}{2})}dx
+\end{split}
+\end{equation}
+
+\subsection*{Initial Outline}
+\begin{enumerate}
+    \item Set parameters and variables
+    \item Construct the integral
+    \item evaluate the integral using Scrambled Sobol Sequences in Fortran. 
+    \item To do this we need to understand how to shuffle the sequence, and how many sobol points are necessary for the calculation.
+\end{enumerate}
+ 
+ \subsection*{Long-Term Code Outline}
+\begin{enumerate}
+    \item Calculate the $\braket{0|G(x)|0}$ case using a Hermite polynomial variable explicitly.
+    \item Calculate the $\braket{0|G(x)|0}$ case using a Harmonic Oscillator variable explicitly.
+    \item Write a subroutine to calculate the Hermite polynomials using the recursion relation for any input. 
+    \item Write a subroutine to calculate the Harmonic Oscillator basis functions.
+    \item Once we have a working system we can include a potential energy surface. 
+\end{enumerate}
+
+\section*{Generalized Information}
+The Harmonic Oscillator wave-functions are given by 
+\begin{equation}
+    \psi_v(x) = \ket{v} = N_vHe_v(\sqrt{\alpha}x)e^{\frac{-\alpha x^2}{2}}
+\end{equation}
+Where the normalization constant $N_v = \frac{1}{\sqrt{2^vv!}}\left (\frac{\alpha}{\pi}\right )^{\frac{1}{4}}$. 
+The Hermite Polynomials are part of the solution to the Harmonic Oscillator wave-function and are found by the following general formula:
+
+\begin{equation}
+    He = He_v(x) = (-1)^v e^{x^2}\frac{d^v}{dx^v}\left [ e^{-x^2} \right ]
+\end{equation}
+From evaluating we find the first few polynomials to be \begin{equation}
+    \begin{split}
+        H_0 = 1 \\
+        H_1 = 2x \\
+        H_2 = 4x^2 - 2 \\
+        H_3 = 8x^3 - 12x
+    \end{split}
+\end{equation}
+
+We also know that the Hermite polynomials obey the recursive relationship.
+\begin{equation}
+    H_{v+1} = 2xH_v(x) - 2vH_{v-1}(x)
+\end{equation}
+
+From this we see that we can write a subroutine to generate any of the Hermite Polynomials recursively. 
+Once we can generate the Hermite Polynomials we can write another subroutine to call upon them, and to calculate the Eigenfunctions of the Harmonic Oscillator. 
+
+In general we are going to construct the following matrix elements
+\begin{equation}
+    \braket{v|\sqrt{\frac{1}{2\pi}}e^{-\frac{x^2}{2}}|v}
+\end{equation}
+Considering our previous analysis on combinatorial scaling we should be able to generate a matrix with the above matrix elements for a 9 $\times$ 9 matrix.
+
+\end{document}
