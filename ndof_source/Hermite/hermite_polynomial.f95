@@ -1,4 +1,4 @@
-!Generate Hermite Polynomial coeficients for H_0-H_10
+!Generate Hermite Polynomial coeficients for H_0 to H_10
 
 PROGRAM Hermite
   IMPLICIT NONE
