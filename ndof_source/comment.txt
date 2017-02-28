@@ -1,3 +1,6 @@
 Here are the various source files for the code I am developing.
-While developing things are going to be "disorganized"
-Once things work I will make a "cleaner" repository
+Note each directory refers to a specific task I am working on, containing a file with and without comments. 
+Once a task is working it is added to the ndof_final directory.
+This directory contains the actual working program, with all of the functions and subroutines developed in their individual directories and compiles them inside main. 
+
+Therefore teh actual MAIN program is within ndof_final
