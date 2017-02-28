@@ -8,13 +8,10 @@ PROGRAM Main
 
   REAL*8 :: A(0:10)
   REAL*8 :: B(0:10,0:10)
-  INTEGER :: degree,k
+  INTEGER :: degree,k,    integrand
 
-  !New Code
   PRINT *, "What degree polynomial would you like to consider?"
   READ (*,*) degree
-
-  WRITE(*,25) degree
 
   CALL Hermite_Coeff(degree,A,B)
 
@@ -24,9 +21,7 @@ PROGRAM Main
 
   stop
 
-	25 format('Coefficients for Hermite Polynomial',i2/)
 	50 format('A(',i2,') = ',f10.0)
-
 
 
 END PROGRAM Main
