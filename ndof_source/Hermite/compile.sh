@@ -1,3 +1,3 @@
 rm *.out
-gfortran hermite_polynomial.f95
+gfortran hermite_polynomial.f90
 ./a.out
