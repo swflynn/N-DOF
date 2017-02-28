@@ -1,17 +1,17 @@
-2-21-17
+2-27-17
 
-hermite currently calculates teh coefficient for any Hermite polynomial between degree 0-10
-(We do not expect to go past dimension 9 for our calculations)
+The work in this directory appears in the MAIN program through the SUBROUTINE Hermite_Coeff
+
+hermite calculates the coefficient for any Hermite polynomial between degree 0-10
+(We do not expect to go past dimension 9 from the basis scaling calculation)
 
 The code outputs a value for each degree of x in subsequent entrees 
 
-Degree is hard coded at the top and selects for which degree you want
+Currently the code asks the user for what degree polynomial they want.
 
 
 Things to do:
 
 We will need to get these as functions of x, therefore we will need to multiply each term by the appropriate power of x
-
-We need to make this something we can call where we choose which polynomial we want (degree)
 
 Need to generate my function for the integral using this
