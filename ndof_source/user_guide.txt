@@ -1,6 +1,10 @@
-Here are the various source files for the code I am developing.
-Note each directory refers to a specific task I am working on, containing a file with and without comments. 
-Once a task is working it is added to the ndof_final directory.
-This directory contains the actual working program, with all of the functions and subroutines developed in their individual directories and compiles them inside main. 
+At this level you can find the program MAIN and the associated module within the directory ndof_final.
 
-Therefore teh actual MAIN program is within ndof_final
+All of the other directories contain individual portions of the code that were made as I developed the code. 
+These directories once working are directly copied into the MAIN module. 
+
+Therefore a specific directory will contain one task from main, with various comments about the development of the code and its functions. 
+
+The ndof_final directory contains the polished working program as a whole. 
+
+The MAIN program is within ndof_final!
