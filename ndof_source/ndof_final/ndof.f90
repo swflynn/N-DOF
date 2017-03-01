@@ -11,7 +11,7 @@ PROGRAM Main
   INTEGER :: degree,k, herm_1
 
   herm_1 = 0
-  print *, herm_1
+!  print *, herm_1
 
   PRINT *, "What degree polynomial would you like to consider?"
   READ (*,*) degree

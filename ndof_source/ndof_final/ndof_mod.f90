@@ -5,7 +5,10 @@ MODULE ndof_mod
 
   CONTAINS 
 
-!=====================================================================!
+!===============================================================================!
+!
+! Hermite_Coeff takes in any integer from 0-10 and returns the coefficients of 
+! the hermite polynomials as a printed list
 
    SUBROUTINE Hermite_Coeff(degree,A,B)  
       IMPLICIT NONE
@@ -39,8 +42,24 @@ MODULE ndof_mod
 
     END SUBROUTINE Hermite_Coeff 
 
+!===============================================================================!
+! e_fn_eval takes in the value of x, and evaluates it for a normalized Gaussian
+! Distrinution e^(-x^2).
+! This function contains G for the matrix elements <v|G(x)|v>
 
-!=====================================================================!
+    FUNCTION  e_fn_eval(x) RESULT (value_e_fn)
+      IMPLICIT NONE
+
+      REAL :: x
+      REAL :: value_e_fn
+
+      value_e_fn = EXP(-X**2)
+
+    END FUNCTION e_fn_eval
+
+
+!===============================================================================!
+
 
 
 END MODULE ndof_mod
