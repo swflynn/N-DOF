@@ -1,2 +1,8 @@
 Just as in Expec_fun, I am going to write a function to generate any Hermite polynomial as a function of x.
 The goal of this function is to take in any degree Hermite polynomial from 0-10, and to output the evaluation of this polynomial for any value of x. 
+
+The take away from running these calculations and comparing to the calculated value (using mathematica) is that for even small values of x the polynomials 7 and higher do not properly evaluate without changing the percision and formatting abailable to them. 
+
+This problem will need to be addressed, maybe by recursion vlad means calculate degree 0, 1, and then all the others by recursion for each specific x. 
+
+
