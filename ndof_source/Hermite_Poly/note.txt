@@ -1,0 +1,2 @@
+Just as in Expec_fun, I am going to write a function to generate any Hermite polynomial as a function of x.
+The goal of this function is to take in any degree Hermite polynomial from 0-10, and to output the evaluation of this polynomial for any value of x. 
