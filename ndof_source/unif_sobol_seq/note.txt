@@ -1,6 +1,10 @@
-This code calls the sobol.f90 module to generate a sobol sequence. 
+This code is working properly 3/8/17 -Shane
+
+This code calls the sobol.f90 module to generate a sequence of sobol points that are uniformly distributed. 
 
 You specify your spatial dimension: m
 The number of points you want to generate: n
-The number of points to skip: seed
-And it outputs a vector: r(m,n) containing the points
+The number of points to skip when generating: seed
+
+And it outputs a vector: r(m,n) containing the points. 
+We print the points just to make sure it is working. 
