@@ -9,7 +9,7 @@ PROGRAM main
       INTEGER (kind=8) :: m
       INTEGER (kind=8) :: n
       INTEGER (kind=8) :: skip
-      REAL (kind=8), DIMENSION(:), ALLOCATABLE :: r
+      REAL (kind=8), DIMENSION(:) :: r
 
       m = 1
       n = 10
