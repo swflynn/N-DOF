@@ -9,7 +9,7 @@ PROGRAM unif_sobol_points
       Double Precision, allocatable :: r(:,:)
 
       m = 1                   !spatial dimension
-      n = 10                  !number of points to generate
+      n = 100                  !number of points to generate
       skip = 0                !starting sobol point
       ALLOCATE (r(m,n))
 
