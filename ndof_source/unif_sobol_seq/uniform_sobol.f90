@@ -1,5 +1,6 @@
 ! Quick code to call sobol.f90 and generate sobol points
 ! Once we generate the points we integrate using MC
+! This code is seems to be working 3/8/17 -Shane
 
 PROGRAM unif_sobol_points
       USE  sobol
@@ -11,32 +12,38 @@ PROGRAM unif_sobol_points
       INTEGER :: i
       REAL*8 :: f
 
+
       m = 1                   !spatial dimension
-      n = 10000               !number of points to generate
+      n = 100               !number of sobol points generated
       skip = 0                !starting sobol point
       end_val = 10.0          !Integral bounds
       start_val = 0.0
-      int_range = end_val - start_val
-      ALLOCATE (r(m,n))       !allocate space for arrays
-      ALLOCATE (q(m,n))
-
-      CALL i8_sobol_generate(m, n, skip, r)
-      q = r*int_range    ! we now have random points sampling whole integral bound
-
-     
-      f = 0.0D0
+      int_range = end_val - start_val  !range of integral to normalize MC
+      f = 0.0D0               ! initialize values for integral
       integral = 0.0
+
+      ALLOCATE (r(m,n))       !allocate space for arrays
+      ALLOCATE (q(m,n))       
+
+!Call the module to generate a uniform sobol sequence
+      CALL i8_sobol_generate(m, n, skip, r) 
+
+! sobol numbers are [0,1] we need to sample the whole function range
+      q = r*int_range    
+    
+! for each value within q(m,n) call function and add up values
       DO i=1,n
           f = f+integrand(q(m,i))
       END DO
-      f = f/n
 
+! normalize your MC summation
+      f = f/n
       integral = (end_val-start_val)*f
 
+! Here is the numerical approximation of the integral!
       PRINT *, integral
         
-
-
+! Function that we are trying to integrate
 CONTAINS
 
       FUNCTION integrand(r) RESULT (values)
