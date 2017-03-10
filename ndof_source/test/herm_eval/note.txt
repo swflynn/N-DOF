@@ -1,0 +1,4 @@
+This file is to evaluate the hermite polynomials from 0 to 9 for a given point. 
+The file needs to be generalized to take an array of sobol points
+
+The single point evaluation is correct. 
