@@ -1,4 +1,4 @@
-This file is to evaluate the hermite polynomials from 0 to 9 for a given point. 
-The file needs to be generalized to take an array of sobol points
+This code take an array of 2 points.
+It then evaluates each hermite polynomial from 0:9 for each point
 
-The single point evaluation is correct. 
+The file needs to be generalized to take an array of sobol points, indepedent of its size
