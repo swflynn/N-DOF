@@ -1,25 +1,24 @@
 PROGRAM herm_poly_eval
       IMPLICIT NONE
 
-      REAL, DIMENSION(0:1) :: chi 
-      INTEGER :: i, j
+      !I need to make the size of chi general
+      REAL, DIMENSION(0:2) :: chi 
+      INTEGER :: i, j, size_chi, k
       DOUBLE PRECISION, DIMENSION(0:9, 0:9) :: herm
 
       ! make an array with values (this would be our sobol numbers)
-      chi(0) = 3.0
-      chi(1) = 5.0
+      chi(0) = 0.5
+      chi(1) = 1.0
+      chi(2) = 5.0
 
-      ! initialize the first 2 polynomials for recursion 
-      !I should go back and do this for a general case
-      !For now the specific definitions work
-      herm(0,0) = 1.0
-      herm(1,0) = 1.0
 
-      herm(0,1) = 2.0*chi(0)
-      herm(1,1) = 2.0*chi(1)
-      
-     
-      DO i = 0, 1
+      size_chi = size(chi)
+      size_chi = size_chi - 1         !subtract 1 because index is 0 for polynomials
+
+      DO i = 0, size_chi
+          herm(i,0) = 1.0             !initialize first 2 polynomials for recursion
+          herm(i,1) = 2.0*chi(i)
+
       PRINT *, herm(i,0)
       PRINT *, herm(i,1)
 
