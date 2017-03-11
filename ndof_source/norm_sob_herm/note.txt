@@ -1,0 +1,5 @@
+This directory uses the sobol.f90 (my_lib) module
+It generates a sequence of uniform distributed sobol points
+It then evaluates each point one by 1 iteratively through the hermite polynomials H_0-H_9
+
+Need to generalize to any spatial dimension of sobolo points currently works for only 1
