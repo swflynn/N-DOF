@@ -1,17 +1,12 @@
-2-27-17
-
-The work in this directory appears in the MAIN program through the SUBROUTINE Hermite_Coeff
-
-hermite calculates the coefficient for any Hermite polynomial between degree 0-10
+Code calculates the coefficient for any Hermite polynomial between degree 0-10
 (We do not expect to go past dimension 9 from the basis scaling calculation)
 
 The code outputs a value for each degree of x in subsequent entrees 
-
 Currently the code asks the user for what degree polynomial they want.
 
+Usefule for quickly generating the coeficients, this method should not be used for evaluation due to numerical stability of generating the coeficients.
+Instead we will write code to use the recursion relation to evaluate each polynomial at a specific point x for H_0-H_9. 
 
-Things to do:
+See unif_sob_herm
 
-We will need to get these as functions of x, therefore we will need to multiply each term by the appropriate power of x
-
-Need to generate my function for the integral using this
+Code is working 2/17/17 -Shane

@@ -1,4 +1,4 @@
-! Code to generate Hermite Polynomiali coeficients, only for polynomials 0 - 10
+! Generate Hermite Polynomiali coeficients, only for H_0 - H_10
 
 PROGRAM Hermite
   IMPLICIT NONE
