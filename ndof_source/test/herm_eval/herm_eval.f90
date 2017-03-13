@@ -1,7 +1,6 @@
 PROGRAM herm_poly_eval
       IMPLICIT NONE
 
-      !I need to make the size of chi general
       REAL, DIMENSION(0:2) :: chi 
       INTEGER :: i, j, size_chi, k
       DOUBLE PRECISION, DIMENSION(0:9, 0:9) :: herm
@@ -19,8 +18,10 @@ PROGRAM herm_poly_eval
           herm(i,0) = 1.0             !initialize first 2 polynomials for recursion
           herm(i,1) = 2.0*chi(i)
 
-      PRINT *, herm(i,0)
-      PRINT *, herm(i,1)
+          PRINT *, 'Evaluating the polynomials at: ', chi(i)
+
+          PRINT *, herm(i,0)
+          PRINT *, herm(i,1)
 
          DO j = 2, 9
 
@@ -30,6 +31,5 @@ PROGRAM herm_poly_eval
          END DO
 
       END DO
-    
 
 END PROGRAM herm_poly_eval
