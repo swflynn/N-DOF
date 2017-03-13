@@ -1,0 +1,6 @@
+This directory uses the sobol.f90 (my_lib) module
+It generates a sequence of uniform distributed sobol points
+It then evaluates each point one by 1 iteratively through the hermite polynomials H_0-H_9
+The code is written to evaluate a specified number of sobol points, not good for memory, done this way for testing purposes.
+This main code will need to be written as a funciton to evaluate a single sobol point, and then loop through the sobol points. 
+This code is working fine 3/11/17 -Shane
