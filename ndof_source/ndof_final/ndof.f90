@@ -16,7 +16,7 @@ PROGRAM main
 
    m = 1                   !spatial dimension only works for 1 currently
    n = 2               !number of points to generate
-   skip = 2                !starting sobol point
+   skip = 10                !starting sobol point
 
    ALLOCATE (r(m,n))       !allocate space for sobol points array
 
