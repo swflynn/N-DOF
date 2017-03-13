@@ -4,7 +4,7 @@
 PROGRAM expec_fn
   IMPLICIT NONE
 
-  INTEGER, PARAMETER :: n = 10
+  INTEGER, PARAMETER :: n = 100
 	REAL :: u
   INTEGER :: i
 
