@@ -1,5 +1,3 @@
-clear
 rm *.out
-ls
-gfortran 00_expl_comment.f95
+gfortran 00_expl_comment.f90
 ./a.out
