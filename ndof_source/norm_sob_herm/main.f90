@@ -9,10 +9,11 @@ PROGRAM main
   REAL :: end_val, start_val, int_range, integral
   DOUBLE PRECISION, DIMENSION(1:10, 1:10) :: herm
 ! I need to make this (1:10. 1:10, ....) n times
+!This is possible, however not good for memory n gets massive
 
 !===================taken from unif_sobol===================================!
 
-   m = 1                   !spatial dimension
+   m = 1                   !spatial dimension only works for 1 currently
    n = 2               !number of points to generate
    skip = 2                !starting sobol point
 
@@ -24,7 +25,6 @@ PROGRAM main
    PRINT *, r
    Print *, 'Next are the hermite evaluations'
 !===================taken from unif_sobol===================================!
-     
 
 !===================taken from herm_eval===================================!
   DO i = 1, n              
@@ -45,6 +45,5 @@ PROGRAM main
 
   END DO
 !===================taken from herm_eval===================================!
-
 
 END PROGRAM main
