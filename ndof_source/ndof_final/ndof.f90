@@ -1,30 +1,50 @@
-! Intend for this to be the main program for running my ndof module. 
-! will put all functions/subroutines within the module, then run this. 
+! This is the program main for ndof. 
+!Please see the test directory for documentation. 
 
-
-PROGRAM Main
-  USE ndof_mod
+PROGRAM main
+  USE sobol
   IMPLICIT NONE
 
-  REAL*8 :: A(0:10)
-  REAL*8 :: B(0:10,0:10)
-  INTEGER :: degree,k, herm_1
+  INTEGER (kind=8) :: m, n, skip, i, j
+  Double Precision, allocatable :: r(:,:)
+  REAL :: end_val, start_val, int_range, integral
+  DOUBLE PRECISION, DIMENSION(1:10, 1:10) :: herm
+! Hard code number of sobol points to evaluate here. 
+! Could generalize to n points, however not good for memory, as n gets massive.
 
-  herm_1 = 0
-!  print *, herm_1
+!===================taken from unif_sobol===================================!
 
-  PRINT *, "What degree polynomial would you like to consider?"
-  READ (*,*) degree
+   m = 1                   !spatial dimension only works for 1 currently
+   n = 2               !number of points to generate
+   skip = 2                !starting sobol point
 
-  CALL Hermite_Coeff(degree,A,B)
+   ALLOCATE (r(m,n))       !allocate space for sobol points array
 
-  DO k = 0, degree
-      WRITE(*,50) k, A(k)
-  END DO 
+   CALL i8_sobol_generate(m, n, skip, r) !populates r(m,n) 
 
-  stop
+   PRINT *, 'here are your sobol points'
+   PRINT *, r
+   Print *, 'Next are the hermite evaluations'
+!===================taken from unif_sobol===================================!
 
-	50 format('A(',i2,') = ',f10.0)
+!===================taken from herm_eval===================================!
+  DO i = 1, n              
+    herm(i,1) = 1.0             !initialize first 2 polynomials for recursion
+    herm(i,2) = 2.0*r(m,i)        !This is correct
 
+    PRINT *, 'next point'
 
-END PROGRAM Main
+    PRINT *, herm(i,1)
+    PRINT *, herm(i,2)
+
+    DO j = 3,10       
+
+      herm(i,j) = (2.0*r(m,i)*herm(i, j-1)) - (2.0*(j-2)*herm(i, j-2))
+      PRINT *, herm(i,j)
+
+    END DO
+
+  END DO
+!===================taken from herm_eval===================================!
+
+END PROGRAM main
