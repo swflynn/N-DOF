@@ -1,4 +1,5 @@
 !Code for generating normal sobol sequence and evaluate hermite polynomials
+! Works for a single spatial dimesnion only, and specified number of points
 
 PROGRAM main
   USE my_lib
@@ -8,8 +9,8 @@ PROGRAM main
   Double Precision, allocatable :: r(:,:)
   REAL :: end_val, start_val, int_range, integral
   DOUBLE PRECISION, DIMENSION(1:10, 1:10) :: herm
-! I need to make this (1:10. 1:10, ....) n times
-!This is possible, however not good for memory n gets massive
+! Hard code number of sobol points to evaluate here. 
+! Could generalize to n points, however not good for memory, as n gets massive.
 
 !===================taken from unif_sobol===================================!
 

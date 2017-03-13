@@ -1,6 +1,6 @@
 ! Quick code to call sobol.f90 and generate sobol points
 ! Once we generate the points we integrate using MC
-! This code is seems to be working 3/8/17 -Shane
+! This code seems to be working 3/8/17 -Shane
 
 PROGRAM unif_sobol_points
       USE  sobol
