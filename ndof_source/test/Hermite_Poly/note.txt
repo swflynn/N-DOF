@@ -5,4 +5,4 @@ The take away from running these calculations and comparing to the calculated va
 
 It is numerically unstable to evaluate each degree for a given polynomial, these will need to be calculated using recursion. 
 
-See 
+See  unif_sob_herm directory for this method. 

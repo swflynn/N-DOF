@@ -1,4 +1,4 @@
-! develop code to evaluate any hermite polynomial for a value of x. 
+! Evaluate H_6 for any x
 
 PROGRAM herm_fn_6
   IMPLICIT NONE

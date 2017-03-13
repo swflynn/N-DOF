@@ -1,5 +1,4 @@
-! develop code to evaluate any hermite polynomial for a value of x. 
-! The first function is simply 1
+! Evaluate H_0 for a given x
 
 PROGRAM herm_fn_0
   IMPLICIT NONE
