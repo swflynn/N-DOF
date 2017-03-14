@@ -1,3 +1,0 @@
-Need to generate sobol sequence with a normal distribution not a uniform distribution as I have been doing. 
-
-Starting by copying the scp code and will lsowly edit it to work for me
