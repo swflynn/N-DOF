@@ -1,0 +1,1 @@
+Need to generate sobol sequence with a normal distribution not a uniform distribution as I have been doing. 
