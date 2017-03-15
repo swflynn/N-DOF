@@ -6,40 +6,48 @@ PROGRAM main
   USE sobol
   IMPLICIT NONE
 
-  INTEGER (kind=8) :: m, Nsobol, skip, i, j
-  Double Precision, allocatable :: r(:,:)
+  INTEGER :: d, Nsobol, i, j, k
+  INTEGER*8 :: skip
+  DOUBLE PRECISION, ALLOCATABLE:: norm(:), norm_a(:) 
   DOUBLE PRECISION, DIMENSION(1:10) :: herm
 
-   m = 1                   
-   Nsobol = 100           
-   skip = 2              
+  d = 1                           
+  Nsobol = 100                   
+  skip = 10                        
 
-   OPEN(unit=10, file='data.dat')
+  OPEN(UNIT=10, FILE='data.dat')
 
-   ALLOCATE (r(m,Nsobol)) 
+  ALLOCATE (norm(d))
+  ALLOCATE (norm_a(Nsobol))
 
-   CALL i8_sobol_generate(m, Nsobol, skip, r) 
+  DO i = 1, Nsobol                
 
-   Write(10,*), 'here are your sobol points'
-   WRITE(10,*), r
-   WRITE(10,*), 'Next are the hermite evaluations'
+    CALL sobol_stdnormal(d,skip,norm)
+    WRITE(10,*) norm(d)
+    norm_a(i) = norm(d)
 
-   DO i = 1, Nsobol              
-    herm(1) = 1.0             
-    herm(2) = 2.0*r(m,i)       
+  END DO
+ 
+  WRITE(10,*) norm_a
 
-    WRITE(10,*), 'next point', r(m,i)
+  DO j = 1, Nsobol              
+    herm(1) = 1.0             !initialize first 2 polynomials for recursion
+    herm(2) = 2.0*norm_a(j)       
+
+    WRITE(10,*), 'next point', norm_a(j)
+
     WRITE(10,*), herm(1)
     WRITE(10,*), herm(2)
 
-    DO j = 3,10       
+    DO k = 3,10       
 
-      herm(j) = (2.0*r(m,i)*herm(j-1)) - (2.0*(j-2)*herm(j-2))
-      WRITE(10,*), herm(j)
+      herm(k) = (2.0*norm_a(j)*herm(k-1)) - (2.0*(k-2)*herm(k-2))
+      WRITE(10,*), herm(k)
 
     END DO
 
-   END DO
-   CLOSE(10)
+  END DO
+
+  CLOSE(10)
 
 END PROGRAM main
