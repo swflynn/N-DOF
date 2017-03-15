@@ -8,7 +8,7 @@ PROGRAM main
 
   INTEGER :: d, Nsobol, i, j, k
   INTEGER*8 :: skip
-  DOUBLE PRECISION, ALLOCATABLE:: norm(:), norm_a(:) 
+  DOUBLE PRECISION, ALLOCATABLE:: norm(:,:)
   DOUBLE PRECISION, DIMENSION(1:10) :: herm
 
   d = 1                           
@@ -17,37 +17,26 @@ PROGRAM main
 
   OPEN(UNIT=10, FILE='data.dat')
 
-  ALLOCATE (norm(d))
-  ALLOCATE (norm_a(Nsobol))
+  ALLOCATE (norm(d,Nsobol))
 
   DO i = 1, Nsobol                
-
-    CALL sobol_stdnormal(d,skip,norm)
-    WRITE(10,*) norm(d)
-    norm_a(i) = norm(d)
-
+    CALL sobol_stdnormal(d,skip,norm(:,i))
+    WRITE(10,*) norm(:,i)
   END DO
- 
-  WRITE(10,*) norm_a
 
   DO j = 1, Nsobol              
     herm(1) = 1.0             !initialize first 2 polynomials for recursion
-    herm(2) = 2.0*norm_a(j)       
+    herm(2) = 2.0*norm(d,j)       
 
-    WRITE(10,*), 'next point', norm_a(j)
-
+    WRITE(10,*), 'next point', norm(d,j)
     WRITE(10,*), herm(1)
     WRITE(10,*), herm(2)
 
     DO k = 3,10       
-
-      herm(k) = (2.0*norm_a(j)*herm(k-1)) - (2.0*(k-2)*herm(k-2))
+      herm(k) = (2.0*norm(d,j)*herm(k-1)) - (2.0*(k-2)*herm(k-2))
       WRITE(10,*), herm(k)
-
     END DO
-
   END DO
-
   CLOSE(10)
 
 END PROGRAM main
