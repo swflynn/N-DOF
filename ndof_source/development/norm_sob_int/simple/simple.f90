@@ -7,16 +7,14 @@ PROGRAM simp
   USE sobol
   IMPLICIT NONE
 
-  INTEGER :: d, Nsobol, i, j, k
+  INTEGER :: d, Nsobol, i, j
   INTEGER*8 :: skip
   DOUBLE PRECISION, ALLOCATABLE:: norm(:,:) 
-  DOUBLE PRECISION, DIMENSION:: herm(:) 
-  DOUBLE PRECISION, DIMENSION(1:10) :: mat
+  DOUBLE PRECISION :: herm
+  DOUBLE PRECISION :: mat
+  DOUBLE PRECISION :: gauss
+  DOUBLE PRECISION :: integ
 
-
-!============ variables for integral ==========================!
-  REAL :: gauss, herm1, integ 
-!============ variables for integral ==========================!
 
   d = 1                           
   Nsobol = 10
@@ -26,38 +24,28 @@ PROGRAM simp
 
   ALLOCATE(norm(d, Nsobol))
 !========= generate nsobol array=========================!
-
   DO i = 1, Nsobol                
     CALL sobol_stdnormal(d,skip,norm(:,i))
 !    WRITE(*,*) norm(:,i) 
   END DO
 !========= generate nsobol array=========================!
 
-  DO j = 1, Nsobol !Loop each sobol point
-  DO k = 1, 10      !Loop across row need to define herm(k) forall k
-
-          herm1 = 1.0 
+  DO j = 1, Nsobol 
+          herm = 1.0 
           gauss = val_op(norm(d,j))
-          integ = herm1*gauss*herm(k)
+          integ = herm*gauss*herm
           mat = mat+integ
 
-          WRITE(*,*) 'this is the sobol point', norm(d,j)
-          WRITE(*,*) 'this is the hermite', herm
-          WRITE(*,*) 'this is the second hermite', herm
-          WRITE(*,*) 'this is our gauss', gauss
-          WRITE(*,*) 'this is our matrix element', integ
-
-       END DO
+!          WRITE(*,*) 'this is the sobol point', norm(d,j)
+!          WRITE(*,*) 'this is the hermite', herm
+!          WRITE(*,*) 'this is the second hermite', herm
+!          WRITE(*,*) 'this is our gauss', gauss
+!          WRITE(*,*) 'this is our matrix element', integ
   
   END DO
   
   
   WRITE(*,*) 'This is the integral', mat/SIZE(norm(d,:))
-
-
-
-
-!STOP
 
 
 
@@ -71,7 +59,7 @@ FUNCTION  val_op(x) RESULT (value_fn)
     DOUBLE PRECISION :: x
     DOUBLE PRECISION :: value_fn
 
-    value_fn = EXP(-(X**2))
+    value_fn = EXP(-(X**2/2))
 
 END FUNCTION val_op
 

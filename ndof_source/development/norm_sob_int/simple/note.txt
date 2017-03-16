@@ -1,0 +1,4 @@
+Valid for any number of sobol points
+calculates <H|g|H> for the first element only
+This is not correct, we sample using a gaussian distribution, therefore we do not need to multiply by a gaussian while calculating the matrix elements. 
+
