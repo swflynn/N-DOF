@@ -4,19 +4,18 @@ PROGRAM int_test
 
   INTEGER :: d, Nsobol
   INTEGER :: n, i, j, k, m, o, p
-  INTEGER, PARAMETER :: deg = 6       !polynomial we want to calculate up to
+  INTEGER, PARAMETER :: deg = 10       !polynomial we want to calculate up to
   INTEGER*8 :: skip
   DOUBLE PRECISION, ALLOCATABLE:: norm(:,:)
   DOUBLE PRECISION, DIMENSION(1:10) :: herm, coef
   DOUBLE PRECISION, DIMENSION(1:10, 1:10) :: A
 
   d = 1                           
-  Nsobol = 100000
+  Nsobol = 1000000
   skip = 1000
 
   ALLOCATE (norm(d,Nsobol))
 
-OPEN(UNIT=10, FILE='data.dat')
 A=0d0
 !=========================Get each sobol pointpoint=========================!
   DO n = 1, Nsobol                
@@ -35,6 +34,7 @@ A=0d0
 
 !=========================Get each wavefn coef.=========================!
 
+  OPEN(UNIT=9, FILE='converge.dat')
 
 !=========================evaluate each sobol point=========================!
   DO i = 1, Nsobol              
@@ -55,16 +55,28 @@ A=0d0
         END DO
       !=====================evaluate each matrix element for a single point=========================!
 
+
+! add in function to print results as a function of N
+
+  IF (mod(i,1000)==0) THEN
+    WRITE(9,*) A(4,4) / REAL(i), A(6,6)/REAL(i), A(8,8)/REAL(i), A(10,10)/REAL(i), & 
+ &             A(1,6) / REAL(i), A(1,10)/REAL(i), A(6,1)/REAL(i), A(10,1)/REAL(i), &
+ &             A(7,3) / REAL(i), A(6,8)/REAL(i), A(8,10)/REAL(i), A(9,4)/REAL(i)
+  END IF
+
   END DO
+
+  CLOSE(9)
 !=========================evaluate each sobol point=========================!
   A = A / Nsobol
   
 !=========================write out matrix elements=========================!
+  OPEN(UNIT=10, FILE='data.dat')
   do o=1,deg
      Write(10,*) A(1:deg,o)
   enddo
+  CLOSE(10)
 !=========================write out matrix elements=========================!
   
-  CLOSE(10)
 
 END PROGRAM int_test
