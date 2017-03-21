@@ -1,0 +1,4 @@
+the H9 series have data on the final matrix elements for various NSobol points calculations.
+conv_10E8 calculates the matrix elements specified as a function of Nsobol using: 
+<3|3>, <5|5>, <7|7>, <9|9>, <0|5>, <0|9>, <5|0>, <9|0>, <6|2>, <5|7>, <7|9>, <8|3>  
+(NOTE these are in wavefn notation add 1 to the index for my code ie <3|3> = A(4,4) )
