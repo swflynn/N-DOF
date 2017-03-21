@@ -11,7 +11,7 @@ PROGRAM mat_eval
   DOUBLE PRECISION, DIMENSION(1:10, 1:10) :: A  !matrix elements <H_k|H_m>
 
   d = 1                           
-  Nsobol = 1000000
+  Nsobol = 100000000
   skip = 1000
 
   ALLOCATE (norm(d,Nsobol))
@@ -59,7 +59,7 @@ OPEN(UNIT=9, FILE='converge.dat')     !convergence data file
 
   !=====================Convergence test at every i points=========================!
   IF (mod(i,1000)==0) THEN
-    WRITE(9,*) A(4,4) / REAL(i), A(6,6)/REAL(i), A(8,8)/REAL(i), A(10,10)/REAL(i), & 
+    WRITE(9,*) i, A(4,4) / REAL(i), A(6,6)/REAL(i), A(8,8)/REAL(i), A(10,10)/REAL(i), & 
   &            A(1,6) / REAL(i), A(1,10)/REAL(i), A(6,1)/REAL(i), A(10,1)/REAL(i), &
   &            A(7,3) / REAL(i), A(6,8)/REAL(i), A(8,10)/REAL(i), A(9,4)/REAL(i)
   END IF
