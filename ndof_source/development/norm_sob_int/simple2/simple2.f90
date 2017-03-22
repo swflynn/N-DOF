@@ -55,7 +55,7 @@ DO i = 1, Nsobol
 ! add in function to print results as a function of N
 
   IF (mod(i,10)==0) THEN
-      WRITE(9,*)((A(q,r), q=1,deg), r=1,deg)
+      WRITE(9,*)((A(q,r)/REAL(i), q=1,deg), r=1,deg)
     
 !    DO q = 1,deg                     writes each row of the matrix on its own line
 !      WRITE(9,*) (A(q,r), r=1,deg)
