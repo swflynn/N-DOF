@@ -3,7 +3,7 @@ PROGRAM int_test
   IMPLICIT NONE
 
   INTEGER :: d, Nsobol
-  INTEGER :: n, i, j, k, m, o, p
+  INTEGER :: n, i, j, k, m, o, p, q, r
   INTEGER, PARAMETER :: deg = 10       !polynomial we want to calculate up to
   INTEGER*8 :: skip
   DOUBLE PRECISION, ALLOCATABLE:: norm(:,:)
@@ -11,8 +11,8 @@ PROGRAM int_test
   DOUBLE PRECISION, DIMENSION(1:10, 1:10) :: A
 
   d = 1                           
-  Nsobol = 1000000
-  skip = 1000
+  Nsobol = 100
+  skip = 100
 
   ALLOCATE (norm(d,Nsobol))
 
@@ -30,38 +30,37 @@ A=0d0
   DO p = 3,deg
     coef(p) = coef(p-1)*(1 /SQRT(2.0*REAL(p-1)))
   END DO
- 
-
 !=========================Get each wavefn coef.=========================!
 
   OPEN(UNIT=9, FILE='converge.dat')
 
 !=========================evaluate each sobol point=========================!
-  DO i = 1, Nsobol              
+DO i = 1, Nsobol              
         herm(1) = 1.0             
         herm(2) = 2.0*norm(1,i)       
-        
-      !======================evaluate each herm for a single sobol point=========================!
+!=============evaluate each herm for a single sobol point===================!
         DO j = 3,deg      
              herm(j) =(2.0*norm(d,i)*herm(j-1)) - (2.0*(j-2)*herm(j-2))
         END DO
-      !=====================evaluate each herm for a single sobol point=========================!
-      
-      !=====================evaluate each matrix element for a single point=========================!
+!=========evaluate each herm for a single sobol point======================!
+
+!==============evaluate each matrix element for a single point===================!
         DO k = 1, deg
              DO m = 1, deg
                  A(k,m) = A(k,m) + coef(k)*herm(k)*coef(m)*herm(m)
              END DO
         END DO
-      !=====================evaluate each matrix element for a single point=========================!
-
+ !=============evaluate each matrix element for a single point======================!
 
 ! add in function to print results as a function of N
 
-  IF (mod(i,1000)==0) THEN
-    WRITE(9,*) A(4,4) / REAL(i), A(6,6)/REAL(i), A(8,8)/REAL(i), A(10,10)/REAL(i), & 
- &             A(1,6) / REAL(i), A(1,10)/REAL(i), A(6,1)/REAL(i), A(10,1)/REAL(i), &
- &             A(7,3) / REAL(i), A(6,8)/REAL(i), A(8,10)/REAL(i), A(9,4)/REAL(i)
+  IF (mod(i,10)==0) THEN
+      WRITE(9,*)((A(q,r), q=1,deg), r=1,deg)
+    
+!    DO q = 1,deg                     writes each row of the matrix on its own line
+!      WRITE(9,*) (A(q,r), r=1,deg)
+!    END DO
+
   END IF
 
   END DO
@@ -77,6 +76,5 @@ A=0d0
   enddo
   CLOSE(10)
 !=========================write out matrix elements=========================!
-  
 
 END PROGRAM int_test
