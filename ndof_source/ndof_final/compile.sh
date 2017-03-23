@@ -1,4 +1,4 @@
-rm *.mod *.o *.exe
+rm *.mod *.o *.out *.dat
 gfortran -c sobol.f90
 gfortran -c sobol_stdnormal.f90
 gfortran -c ndof.f90
