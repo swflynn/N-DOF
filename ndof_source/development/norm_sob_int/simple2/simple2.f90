@@ -11,8 +11,8 @@ PROGRAM int_test
   DOUBLE PRECISION, DIMENSION(1:10, 1:10) :: A
 
   d = 1                           
-  Nsobol = 100
-  skip = 100
+  Nsobol = 100000
+  skip = 100000
 
   ALLOCATE (norm(d,Nsobol))
 
