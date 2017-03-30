@@ -1,81 +1,79 @@
-! Use the matlab scrambled sobol sequence
+PROGRAM s_mat_eval
+ IMPLICIT NONE
+  
+ INTEGER :: d, Nsobol
+ INTEGER, PARAMETER :: deg = 10
+ INTEGER :: n, p, i, j, k, m, q
+ DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: scrambled_u
+ DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: scrambled_z
+ DOUBLE PRECISION, DIMENSION(1:10) :: herm, coef 
+ DOUBLE PRECISION, DIMENSION(1:10, 1:10) :: A
 
-PROGRAM s_sobol
-  IMPLICIT NONE
+ d=1
+ Nsobol=10000
+ 
+ ALLOCATE(scrambled_u(d, Nsobol))
+ ALLOCATE(scrambled_z(d, Nsobol))
+ 
+ OPEN(UNIT=6, FILE='s_sobol_unif.dat', STATUS='OLD', ACTION='READ')
+ READ(6,*) scrambled_u
+ CLOSE(UNIT=6)
 
-  INTEGER :: Nsobol
-  DOUBLE PRECISION, ALLOCATABLE :: s_sob_seq(:)
-!  DOUBLE PRECISION, ALLOCATABLE :: norm(:)
+ !=========================Get each sobol point normal_dist=========================!
+ DO n = 1, Nsobol
+    CALL scrambled_sobol_stdnormal(d, scrambled_u(:,n), scrambled_z(:,n))
+ END DO
+ scrambled_z = scrambled_z/SQRT(2.)
+ !=========================Get each sobol point normal_dist=========================!
 
-  Nsobol = 1
+!=========================Get each wavefn coef.=========================!
+  coef(1) = 1.0
+  coef(2) = 1.0 / (SQRT(2.0))
+  DO p = 3,deg
+    coef(p) = coef(p-1)*(1 /SQRT(2.0*REAL(p-1)))
+  END DO
+!=========================Get each wavefn coef.=========================!
+  OPEN(UNIT=9, FILE='converge.dat') 
+!=========================evaluate each sobol point=========================!
+DO i = 1, Nsobol              
+        herm(1) = 1.0             
+        herm(2) = 2.0*scrambled_z(1,i)       
+!=============evaluate each herm for a single sobol point===================!
+        DO j = 3,deg      
+             herm(j) =(2.0*scrambled_z(d,i)*herm(j-1)) - (2.0*(j-2)*herm(j-2))
+        END DO
+!=========evaluate each herm for a single sobol point======================!
 
-  ALLOCATE (s_sob_seq(Nsobol))
-  OPEN(UNIT=10, FILE='s_sobol.dat')
+!==============evaluate each matrix element for a single point===================!
+        DO k = 1, deg
+             DO m = 1, deg
+                 A(k,m) = A(k,m) + coef(k)*herm(k)*coef(m)*herm(m)
+             END DO
+        END DO
+ !=============evaluate each matrix element for a single point======================!
 
-  READ(10,*) s_sob_seq
-  WRITE(*,*) s_sob_seq
-  CLOSE(10)
+! add in function to print results as a function of N
+  IF (mod(i,100)==0) THEN
+      WRITE(9,*) (A) / REAL(i)
+  END IF
 
-!  ALLOCATE (norm(Nsobol))
+  END DO
 
-  CALL beasley_springer_moro(s_sob_seq)
+  CLOSE(UNIT=9)
+!=========================evaluate each sobol point=========================!
+  A = A / Nsobol 
+ 
+!=========================write out matrix elements=========================!
+  OPEN(UNIT=10, FILE='final_matrix.dat')
+  do q=1,deg
+     Write(10,*) A(1:deg,q)
+  enddo
+  CLOSE(UNIT=10)
+!=========================write out matrix elements=========================! 
+ 
+ 
+ DEALLOCATE(scrambled_u)
+ DEALLOCATE(scrambled_z)
 
-  WRITE(*,*) s_sob_seq
-
-
-  CONTAINS 
-
-FUNCTION beasley_springer_moro(u) result(x)
-    IMPLICIT NONE
-
-    INTEGER :: j
-    DOUBLE PRECISION, DIMENSION(:), INTENT(IN) :: u
-
-    DOUBLE PRECISION :: r
-    DOUBLE PRECISION, DIMENSION(SIZE(u)) :: x, y
-
-    DOUBLE PRECISION, PARAMETER, DIMENSION(0:3) :: a = (/ &
-            2.50662823884, &
-            -18.61500062529, &
-            41.39119773534, &
-            -25.44106049637 /)
-
-    DOUBLE PRECISION, PARAMETER, DIMENSION(0:3) :: b = (/ &
-            -8.47351093090, &
-            23.08336743743, &
-            -21.06224101826, &
-            3.13082909833 /)
-
-    DOUBLE PRECISION, PARAMETER, DIMENSION(0:8) :: c = (/ &
-            0.3374754822726147, &
-            0.9761690190917186, &
-            0.1607979714918209, &
-            0.0276438810333863, &
-            0.0038405729373609, &
-            0.0003951896511919, &
-            0.0000321767881768, &
-            0.0000002888167364, &
-            0.0000003960315187 /)
-
-    y = u - 0.5D0
-
-    DO j = 1, SIZE(u)
-        IF (ABS(y(j)) < 0.42) THEN
-            r = y(j)*y(j)
-            x(j) = y(j)*(((a(3)*r + a(2))*r + a(1))*r + a(0))/((((b(3)*r + b(2))*r + b(1))*r + b(0))*r + 1)
-        ELSE
-            IF (y(j) > 0) THEN
-                r = LOG(-LOG(1-u(j)))
-            ELSE IF (y(j) < 0) THEN
-                r = LOG(-LOG(u(j)))
-            END IF
-            x(j) = c(0) + r*(c(1) + r*(c(2) + r*(c(3) + r*(c(4) + r*(c(5) + r*(c(6) + r*(c(7) + r*c(8))))))))
-            IF (y(j) < 0) THEN
-                x(j) = -x(j)
-            END IF
-        END IF
-    END DO
-
-END FUNCTION beasley_springer_moro
-
-END PROGRAM s_sobol
+ 
+END PROGRAM s_mat_eval
