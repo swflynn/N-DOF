@@ -1,6 +1,10 @@
-! Quick code to call sobol.f90 and generate sobol points
-! Once we generate the points we integrate using MC
-! This code seems to be working 3/8/17 -Shane
+! Code to calculate integral of a function using uniform distribution of sobol points
+! Call the sobol.f90 module to generate a sequence of sobol points
+!We then use these point to do a MC integral numerically over a function defined in the program. 
+! To use:
+!specify your spatial dimension: m, number of points to generate: n, number of points to skip when generating: seed
+! Output prints integral of interest numerically. 
+!This code is working properly 3/8/17 -Shane
 
 PROGRAM unif_sobol_points
       USE  sobol
