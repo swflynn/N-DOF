@@ -1,5 +1,0 @@
-This directory uses the sobol.f90 module
-It first generates a sequence of uniformly distributed sobol points within 1 array.
-It then evaluates each point one by 1 iteratively through the hermite polynomials H_0-H_9
-Therefore you just specify how many points to generate, and it will write everything to file data.dat
-This code is working fine 3/11/17 -Shane

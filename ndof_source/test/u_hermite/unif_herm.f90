@@ -1,6 +1,10 @@
-! Generate normal sobol sequence and evaluate hermite polynomials at each point
-! Code is written for 1 dimension only, would need to modify for more. 
-! This is a modified version of unif_sob_herm
+! Generate normal sobol sequence and evaluate hermite polynomials H-0-H-9 at each point in the sequence (1D only). 
+! Generate sequence of uniformly distributed sobol points 
+! Evaluates each  polynomial for a given point iteratively
+! To use:
+! Reguires sobol.f90 module, set Nsobol (m=1 only) and skip. 
+! Output is data.dat, has each sobol point, and H_0-H_9 evaluated at that point recursively
+! Code is working fine 3/11/17 -Shane
 
 PROGRAM main
   USE sobol
@@ -12,7 +16,7 @@ PROGRAM main
 
    m = 1                   !spatial dimension only works for 1 currently
    Nsobol = 100               !number of points to generate
-   skip = 2                !Seed starting point for sobol sequence
+   skip = 100                !Seed starting point for sobol sequence
 
    OPEN(unit=10, file='data.dat')
 
@@ -20,10 +24,6 @@ PROGRAM main
    ALLOCATE (r(m,Nsobol))       !allocate space for sobol points array
 
    CALL i8_sobol_generate(m, Nsobol, skip, r) !populates r(m,n) 
-
-   Write(10,*), 'here are your sobol points'
-   WRITE(10,*), r
-   WRITE(10,*), 'Next are the hermite evaluations'
 
   DO i = 1, Nsobol              
     herm(1) = 1.0             !initialize first 2 polynomials for recursion
