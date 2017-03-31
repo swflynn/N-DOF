@@ -1,9 +1,0 @@
-User should set what degree (deg) polynomial they would like to calculate up to
-Then set the Nsobol number of points to use and the skip
-Code generates a sequence of normally distributed sobol points 'norm' valid for 1 dimension
-Then calculates using recursion the HO wavefunction coeficients
-The the hermite polynomials are calculated recursively
-Finally the matrix elements are calculated by the product of the hermite polynomials and coeficients. 
-There is a convergence analysis which writes out each matrix element in a column. 
-
-Everything is working as of 3-20-17   -Shane
