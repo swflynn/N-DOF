@@ -1,6 +1,0 @@
-For this integral we are calculating <v|G|v>
-Here G is a generic function that we are calculating matrix elements for.
-In this case we are going to start with simply using a normalized gaussian
-G = G(x) = e^{-(x^2)}
-
-This code uses a function to calculate the value of a normalized gaussian  at point x.
