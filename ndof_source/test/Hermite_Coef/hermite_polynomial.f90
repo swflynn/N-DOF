@@ -1,4 +1,9 @@
-! Generate Hermite Polynomiali coeficients, only for H_0 - H_10
+! Generate Hermite Polynomial coeficients, only for H_0 - H_10
+!The code asks use for what degree polynomial they want to calculate
+! This can quickly generate coeficients for user to look at. 
+! Should not be used in real calculations, better to use recursions.
+! See unif_sob_herm for matrix calculations
+! Code is working as of 2-17-17. -Shane
 
 PROGRAM Hermite
   IMPLICIT NONE
