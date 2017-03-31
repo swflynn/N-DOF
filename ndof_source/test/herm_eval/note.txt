@@ -1,4 +1,0 @@
-This code sets an array with a few points, then loops through the array
-For each point we evaluate H_0 - H_9
-
-This code is working 3-5-17 -Shane

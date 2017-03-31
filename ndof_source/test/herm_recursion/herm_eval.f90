@@ -1,3 +1,7 @@
+! Code to test the recursion relationship for H_0-H_9
+! This code sets an array with a few points and then evaluates each
+! Code is working 3-5-17. -Shane
+
 PROGRAM herm_poly_eval
       IMPLICIT NONE
 
