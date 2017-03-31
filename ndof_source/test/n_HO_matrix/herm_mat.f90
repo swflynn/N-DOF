@@ -1,3 +1,13 @@
+!Code to calculate HO matrix elements using normal sobol sequence with convergence analysis (for a single dimension only). 
+ 
+!User should set what degree (deg) polynomial they would like to calculate up to
+!Then set the Nsobol number of points to use and the skip
+!Code generates a sequence of normally distributed sobol points 'norm' valid for 1 dimension (using sobol.f90 and sobol_stdnormal.f90 functions+subroutines). 
+!Then calculates using recursion the HO wavefunction coeficients
+!Then the hermite polynomials are calculated recursively
+!Finally the matrix elements are calculated by the product of the hermite polynomials and coeficients. 
+
+!Everything is working as of 3-20-17   -Shane 
 PROGRAM mat_eval
   
   USE sobol

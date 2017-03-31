@@ -4,7 +4,6 @@ Code generates a sequence of normally distributed sobol points 'norm' valid for 
 Then calculates using recursion the HO wavefunction coeficients
 The the hermite polynomials are calculated recursively
 Finally the matrix elements are calculated by the product of the hermite polynomials and coeficients. 
-
-There is a convergence analysis which writes out each matrix element in a column. This should be removed if it is not needed because it generates a huge file. 
+There is a convergence analysis which writes out each matrix element in a column. 
 
 Everything is working as of 3-20-17   -Shane
