@@ -1,13 +1,12 @@
-PROGRAM s_mat_eval
+! Scrambled sobol sequence from matlab and calculates HO matrix using scrambled sobol sequence from matlab.
+! Currently works for 1D case only, and deg, Nsobol.
+!To use: 
+! Matlab to generate scrambled sobol sequence (.m file). 
+! Then set Nsobol appropriately here, and choose your deg (polynomial to calculate)
+! Set the matrix convergence to write as often as desired
+! Note; the scrambled case no longer needs sobol.f90 functions/subroutines, uses the scrambled function in sobol_stdnormal.f90
 
-!This code takes a scrambled sobol sequence from matlab and calculates matrix
-! Currently works for 1D case only
-!Use matlab to generate sequence, then call sobol_stdnormal.f90 to convert from uniform distribution to normal distribution. 
-! Then evaluate each HO wavefunction at each sobol point and calculate matrix
-! to use set your deg (how many polynomials you want to calculate up to
-! set Nsobol and how often to write out convergence matrix (d=1 only!)
-! Note the scrambled case no longer needs sobol.f90 functions/subroutines
-! set deg, Nsobol, mod for matrix convergence, generate sequence of numbers in matlab and run. 
+PROGRAM s_mat_eval
 
  IMPLICIT NONE
  INTEGER :: d, Nsobol
@@ -76,6 +75,6 @@ PROGRAM s_mat_eval
 
   DEALLOCATE(scrambled_u, scrambled_z, herm, coef, A)
   CALL CPU_TIME(final_time)
-  WRITE(*,*) 'TOTAL TIME: ', final_time - initial_time
+  WRITE(*,*) 'TOTAL TIME (s): ', final_time - initial_time
  
 END PROGRAM s_mat_eval
