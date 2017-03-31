@@ -1,4 +1,0 @@
-Calculate the entire matrix. 
-
-Code generates a sequence of normally distributed sobol points 'norm' valid for 1 dimension
-Then calculates 
