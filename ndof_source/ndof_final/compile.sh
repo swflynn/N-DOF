@@ -1,6 +1,5 @@
-rm *.mod *.o *.out *.dat
-gfortran -c sobol.f90
+rm *.o, *.mod *.out
 gfortran -c sobol_stdnormal.f90
-gfortran -c ndof.f90
-gfortran ndof.f90 sobol.o sobol_stdnormal.o
+gfortran -c main.f90
+gfortran main.f90 sobol_stdnormal.o
 ./a.out

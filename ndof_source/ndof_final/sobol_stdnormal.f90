@@ -1,10 +1,10 @@
-
+!==============================================================================!
 !> Computes the inverse cumulative density function (CDF), i.e., the quantile,
 ! of the standard normal distribution given u uniform on the unit hypercube.
 FUNCTION beasley_springer_moro(u) result(x)
     IMPLICIT NONE
 
-    INTEGER :: j
+    INTEGER :: i, j
     DOUBLE PRECISION, DIMENSION(:), INTENT(IN) :: u
 
     DOUBLE PRECISION :: r
@@ -55,32 +55,64 @@ FUNCTION beasley_springer_moro(u) result(x)
     END DO
 
 END FUNCTION beasley_springer_moro
-
 !==============================================================================!
 
+!==============================================================================!
+!Works with sobol.f90, does not work for scrambled sequence from matlab. 
 
 !> Returns a d-dimensional Sobol sequence of p points following a standard
 !  normal distribution
-subroutine sobol_stdnormal(d, skip, x_stdnormal)
-    use sobol
-    implicit none
+!subroutine sobol_stdnormal(d, skip, x_stdnormal)
+!    use sobol
+!    implicit none
     !> dimension
-    INTEGER(kind = 4), INTENT(IN) :: d
+!    INTEGER(kind = 4), INTENT(IN) :: d
  
     !> number of initial points to be skipped
-    INTEGER(kind = 8), INTENT(IN) :: skip   
+!    INTEGER(kind = 8), INTENT(IN) :: skip   
 
     !> return an array of doubles, standard normal
-    DOUBLE PRECISION, DIMENSION(d), INTENT(OUT) :: x_stdnormal     
+!    DOUBLE PRECISION, DIMENSION(d), INTENT(OUT) :: x_stdnormal     
+
+!    interface
+!        FUNCTION beasley_springer_moro(u)
+!            double precision :: u(:)
+!            double precision :: beasley_springer_moro(size(u))
+!        end function beasley_springer_moro
+!    end interface
+
+!    x_stdnormal = beasley_springer_moro(i8_sobol(int(d, 8), skip))
+
+!END subroutine sobol_stdnormal
+
+!==============================================================================!
+
+!==============================================================================!
+!> Returns a d-dimensional Sobol sequence of p points following a standard
+!  normal distribution
+! Takes Matlab Scrambled Sobol Sequence and converts to normal distribution
+subroutine scrambled_sobol_stdnormal(d, scrambled_u, x_stdnormal)
+
+    implicit none
+
+    !> dimenstion
+    INTEGER(kind = 4), INTENT(IN) :: d
+
+    !> return an array of doubles, standard normal
+    DOUBLE PRECISION, DIMENSION(d), INTENT(INOUT) :: x_stdnormal     
+
+    DOUBLE PRECISION, DIMENSION(d), INTENT(IN) :: scrambled_u
 
     interface
         FUNCTION beasley_springer_moro(u)
-!            double precision :: u(:)            !VM changed
-            double precision, INTENT(IN) :: u(:)
+            double precision :: u(:)
             double precision :: beasley_springer_moro(size(u))
         end function beasley_springer_moro
     end interface
 
-    x_stdnormal = beasley_springer_moro(i8_sobol(int(d, 8), skip))
 
-END subroutine sobol_stdnormal
+    x_stdnormal = beasley_springer_moro(scrambled_u)
+
+
+    END subroutine scrambled_sobol_stdnormal
+!==============================================================================!
