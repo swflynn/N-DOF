@@ -63,7 +63,8 @@ PROGRAM s_mat_eval
                 
 ! I am here 4/18/17
 ! new array for matrix element calculations, in a general manner. 
-
+! for deg=4,s_dim=3 we would want
+! matrix = A(a,b,1)*A(c,d,2)A(e,f,3) and loop over each dimension from 1 to deg
 
 
 !==============Matrix Convergence as a function of N===================!
