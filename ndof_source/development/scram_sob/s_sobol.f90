@@ -2,74 +2,99 @@ PROGRAM s_mat_eval
 
  IMPLICIT NONE
  INTEGER :: Nsobol
- INTEGER, PARAMETER :: deg = 3
- INTEGER, PARAMETER :: s_dim = 1
+ INTEGER, PARAMETER :: deg = 4
+ INTEGER, PARAMETER :: s_dim = 3
+ !INTEGER, PARAMETER :: final_matrx_size = (deg**2)**s_dim
  INTEGER :: i, j, k, m
  REAL :: initial_time, final_time
- DOUBLE PRECISION, ALLOCATABLE :: scrambled_u(:,:), scrambled_z(:), herm(:), coef(:), A(:,:)
+ DOUBLE PRECISION, ALLOCATABLE :: scrambled_u(:,:), scrambled_z(:), herm(:,:), coef(:,:), A(:,:,:)
 
   CALL CPU_TIME(initial_time)
-
- Nsobol=100000
- ALLOCATE(scrambled_u(s_dim, Nsobol), scrambled_z(s_dim), herm(deg), coef(deg), A(deg,deg))
+ 
+ Nsobol=1
+! Nsobol=10
+ !Nsobol=100000
+ ALLOCATE(scrambled_u(s_dim, Nsobol), scrambled_z(s_dim), herm(deg, s_dim), coef(deg, s_dim), A(deg,deg, s_dim))
 
  A = 0d0
+ scrambled_z = 0d0
  
  !=========================Read in Scrambled Sequence=========================!
  OPEN(UNIT=70, FILE='s_sobol_unif.dat', STATUS='OLD', ACTION='READ')
  READ(70,*) scrambled_u
  CLOSE(UNIT=70)
+ !=========================Read in Scrambled Sequence=========================!
 
- !=========================Convert to normal dist=========================!
 
-!=========================Get each wavefn coef.=========================!
-  coef(1) = 1.0
-  coef(2) = 1.0 / SQRT(2.)
+ open(unit=90, file='testcoef.dat')
+!============ Generates a coef for each spatial dim (deg,s_dim)=============!
+  coef(1,:) = 1.0
+  coef(2,:) = 1.0 / SQRT(2.)
   DO i = 3,deg
-    coef(i) = coef(i-1)*(1 / SQRT(2.*(i-1)))
+    coef(i,:) = coef(i-1,:) * (1 / SQRT(2.*(i-1)))
   END DO
+!============ Generates a coef for each spatial dim (deg,s_dim)=============!
 
-  OPEN(UNIT=75, FILE='converge.dat') 
-!=========================evaluate each sobol point=========================!
+
+!  OPEN(UNIT=75, FILE='converge.dat') 
+!=========================evaluate each sobol point each dimension=========================!
   DO i = 1, Nsobol              
-    CALL scrambled_sobol_stdnormal(s_dim, scrambled_u(:,i), scrambled_z(s_dim))
-        scrambled_z = scrambled_z/SQRT(2.)
-        herm(1) = 1.0             
-        herm(2) = 2.0*scrambled_z(s_dim)       
-!=============evaluate each herm for a single sobol point===================!
+    CALL scrambled_sobol_stdnormal(s_dim, scrambled_u(:,i), scrambled_z(:))
+         scrambled_z = scrambled_z/SQRT(2.)
+
+        herm(1,:) = 1.0             
+        herm(2,:) = 2.0*scrambled_z(:)       
         DO j = 3,deg      
-             herm(j) =(2.*scrambled_z(s_dim)*herm(j-1)) - (2.*(j-2)*herm(j-2))
+             herm(j,:) =(2.*scrambled_z(:)*herm(j-1,:)) - (2.*(j-2)*herm(j-2,:))
         END DO
-        herm(:)=herm(:)*coef(:)
-!==============evaluate each matrix element for a single point===================!
-        DO k = 1, deg
-             DO m = 1, deg
-                 A(k,m) = A(k,m) + herm(k)*herm(m)
-             END DO
+        herm(:,:)=herm(:,:)*coef(:,:)
+!=========================evaluate each sobol point each dimension=========================!
+
+
+!=============evaluate product herm(deg)*herm(deg) for all deg, spatial===========!
+!This says for each dimension take herm(i,:)*herm(j,:) and loop i and j from 1 to deg
+! Therefore A will have deg*deg*s_dim entries
+        Do k=1,deg
+            DO m=1,deg
+            A(k,m,:) = herm(k,:)*herm(m,:)
+            END DO
         END DO
+!=============evaluate product herm(deg)*herm(deg) for all deg, spatial===========!
+                
+! I am here 4/18/17
+! new array for matrix element calculations, in a general manner. 
+
+
 
 !==============Matrix Convergence as a function of N===================!
-  IF (mod(i,1000000)==0) THEN
-      WRITE(75,*) (A) / i
-  END IF
+!  IF (mod(i,1000000)==0) THEN
+!      WRITE(75,*) (A) / i
+!  END IF
+  
 
   END DO
 
-  CLOSE(UNIT=75)
+  write(90,*) A
+  close(90) 
 
-  A = A / Nsobol 
+
+
+
+
+!  CLOSE(UNIT=75)
+
+!  A = A / Nsobol 
  
 !=========================write out final matrix elements=========================!
-  OPEN(UNIT=80, FILE='final_matrix.dat')
-  DO i=1,deg
-     Write(80,*) A(1:deg,i)
-  END DO
+!  OPEN(UNIT=80, FILE='final_matrix.dat')
+!  DO i=1,deg
+!     Write(80,*) A(1:deg,i)
+!  END DO
 
-  CLOSE(UNIT=80)
+!  CLOSE(UNIT=80)
   DEALLOCATE(scrambled_u, scrambled_z, herm, coef, A)
 
    CALL CPU_TIME(final_time)
    WRITE(*,*) 'TOTAL TIME: ', final_time - initial_time
  
 END PROGRAM s_mat_eval
-

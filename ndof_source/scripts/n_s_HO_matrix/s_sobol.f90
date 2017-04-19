@@ -76,5 +76,6 @@ PROGRAM s_mat_eval
   DEALLOCATE(scrambled_u, scrambled_z, herm, coef, A)
   CALL CPU_TIME(final_time)
   WRITE(*,*) 'TOTAL TIME (s): ', final_time - initial_time
+
  
 END PROGRAM s_mat_eval
