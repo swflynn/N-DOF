@@ -1,0 +1,11 @@
+Start to generalize the code, this script reads in any dimensional scrambled sobol sequence taken from matlab
+It is valid for any degree polynomial, and any spatial dimension. 
+
+it reads in your points, makes an array with each coefficient for your polynomials coef(deg,s_dim)
+It then makes each polynomial by taking the d_dim points it read in, and calculating all of your polynomials up to degree
+Thsi is stored in matrix herm(deg, s_dim). 
+Finally matrix A contains the 1D matrix (deg,deg) from 1 to deg products, and does this for each dimension
+A(deg,deg,s_dim)
+
+We need to find out how to make our matrix elements now using all of this. 
+See tot_perm for restricting how many integrals we will compute
