@@ -1,0 +1,8 @@
+5-8-17
+Trying to compile all the various functions and subroutines into 1 module to make the code work. 
+Then write the code at the bottom of the module (Vlad suggestion)
+
+
+This will need to be able to handle scrambled and non-scrambled, I will get scrambled working first and then add in non-scrambled. 
+
+

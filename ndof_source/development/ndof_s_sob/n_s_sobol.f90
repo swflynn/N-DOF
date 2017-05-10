@@ -5,31 +5,28 @@ PROGRAM s_mat_eval
  INTEGER, PARAMETER :: deg = 4                  !highest degree polynomial
  INTEGER, PARAMETER :: d = 3                    !spatial dimension
  INTEGER, PARAMETER :: vmax = 9                 !Highest Excitation to consider
- INTEGER, PARAMETER :: jmax = (deg*deg)**d      !number of possible basis functions
+ INTEGER, PARAMETER :: jmax = 220               ! Permutations from subroutine
  INTEGER :: i, j, k, m
  REAL :: initial_time, final_time
  DOUBLE PRECISION, ALLOCATABLE :: scrambled_u(:,:), scrambled_z(:), herm(:,:), coef(:,:), A(:,:,:)
- Double Precision, Allocatable :: v(:,:)
+! Integer, Allocatable :: v(:,:)
 
 
   CALL CPU_TIME(initial_time)
  
  Nsobol=1
-! Nsobol=10
  !Nsobol=100000
  ALLOCATE(scrambled_u(d, Nsobol), scrambled_z(d), herm(deg, d), coef(deg, d), A(deg,deg, d))
-ALLOCATE(v(d,jmax))
+!ALLOCATE(v(d,jmax))
 
 
  A = 0d0
- scrambled_z = 0d0
  
  !=========================Read in Scrambled Sequence=========================!
  OPEN(UNIT=70, FILE='s_sobol_unif.dat', STATUS='OLD', ACTION='READ')
  READ(70,*) scrambled_u
  CLOSE(UNIT=70)
  !=========================Read in Scrambled Sequence=========================!
-
 
  open(unit=90, file='testcoef.dat')
 !============ Generates a coef for each spatial dim (deg,s_dim)=============!
@@ -41,7 +38,6 @@ ALLOCATE(v(d,jmax))
 !============ Generates a coef for each spatial dim (deg,s_dim)=============!
 
 
-!  OPEN(UNIT=75, FILE='converge.dat') 
 !=========================evaluate each sobol point each dimension=========================!
   DO i = 1, Nsobol              
     CALL scrambled_sobol_stdnormal(d, scrambled_u(:,i), scrambled_z(:))
@@ -65,48 +61,20 @@ ALLOCATE(v(d,jmax))
         END DO
 !=============evaluate product herm(deg)*herm(deg) for all deg, spatial===========!
 ! I am here 4/18/17
-! new array for matrix element calculations, in a general manner all dimensions
-
-
-
-
-
-
-
-
-
-
-!==============Matrix Convergence as a function of N===================!
-!  IF (mod(i,1000000)==0) THEN
-!      WRITE(75,*) (A) / i
-!  END IF
   
-
   END DO
 
-  write(90,*) A
+!  write(90,*) A
   close(90) 
 
 
+!make sure new subroutine works
+! CALL vofj(d,vmax, v)
 
-
-
-!  CLOSE(UNIT=75)
-
-!  A = A / Nsobol 
  
-!=========================write out final matrix elements=========================!
-!  OPEN(UNIT=80, FILE='final_matrix.dat')
-!  DO i=1,deg
-!     Write(80,*) A(1:deg,i)
-!  END DO
-
-!  CLOSE(UNIT=80)
   DEALLOCATE(scrambled_u, scrambled_z, herm, coef, A)
-DEALLOCATE(v)
+!  DEALLOCATE(v)
    CALL CPU_TIME(final_time)
    WRITE(*,*) 'TOTAL TIME: ', final_time - initial_time
-
-
 
 END PROGRAM s_mat_eval

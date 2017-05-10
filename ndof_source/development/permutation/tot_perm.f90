@@ -1,10 +1,12 @@
 Program perms
 
 IMPLICIT NONE
-INTEGER, PARAMETER :: spatial_dim = 9           !======spatial dimension !!!!code only works spatial_dim = 9======!
+INTEGER, PARAMETER :: spatial_dim = 9 !=spatial dimension !code only works spatial_dim =9
 INTEGER, PARAMETER :: vmax = 3                 !Highest Excitation to consider
 integer :: j,Vm(Spatial_dim),vv(Spatial_dim),k,v1,v2,v3,v4,v5,v6,v7,v8,v9
- 
+integer, Parameter :: Jmax = 220
+integer :: v(spatial_dim, Jmax)
+
 j=0
  Vm(1)=Vmax
  if(Spatial_dim>9) stop 'Spatial_dim>9'
@@ -43,68 +45,68 @@ j=0
                                                   do v9=0,Vm(9)
                                                      vv(9)=v9
                                                      j=j+1
-                                                  write(*,*) 'j=',j,vv !here
+!                                                  write(*,*) 'j=',j,vv  !here
                                                      do k=1,Spatial_dim
-!                                                        v(k,j)=vv(k) 
+                                                        v(k,j)=vv(k)       !here
                                                      enddo
                                                   enddo
                                                else
                                                   j=j+1
                                                   do k=1,Spatial_dim
-!                                                    v(k,j)=vv(k) 
+                                                    v(k,j)=vv(k)           !here
                                                   enddo
                                                endif
                                             enddo
                                          else
                                             j=j+1
                                             do k=1,Spatial_dim
-!                                               v(k,j)=vv(k) 
+                                               v(k,j)=vv(k)                !here
                                             enddo
                                          endif
                                       enddo
                                    else
                                       j=j+1
                                       do k=1,Spatial_dim
-!                                         v(k,j)=vv(k) 
+                                         v(k,j)=vv(k)                      !here
                                       enddo
                                    endif
                                 enddo
                              else
                                 j=j+1
                                 do k=1,Spatial_dim
-!                                   v(k,j)=vv(k)  
+                                   v(k,j)=vv(k)                            !here
                                 enddo
                              endif
                           enddo
                        else 
                           j=j+1 
                           do k=1,Spatial_dim
-!                             v(k,j)=vv(k)  
+                             v(k,j)=vv(k)                                  !here
                           enddo
                        endif
                     enddo
                  else
                     j=j+1
                     do k=1,Spatial_dim
-!                       v(k,j)=vv(k)   
+                       v(k,j)=vv(k)                                        !here
                     enddo
                  endif
               enddo
            else
               j=j+1
               do k=1,Spatial_dim
-!                 v(k,j)=vv(k)   
+                 v(k,j)=vv(k)                                              !here
               enddo
            endif
         enddo
      else
         j=j+1
         do k=1,Spatial_dim
-!           v(k,j)=vv(k)   
+           v(k,j)=vv(k)                                                    !here
         enddo
      endif
   enddo 
 
- write(*,*) 'Jmax=', j
-   
+! write(*,*) 'Jmax=', j
+write(*,*) v   
 end Program perms
