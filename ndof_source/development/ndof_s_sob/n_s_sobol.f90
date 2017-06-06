@@ -1,7 +1,7 @@
 PROGRAM s_mat_eval
 
  IMPLICIT NONE
- INTEGER :: Nsobol
+ INTEGER, PARAMETER :: Nsobol = 1
  INTEGER, PARAMETER :: deg = 4                  !highest degree polynomial
  INTEGER, PARAMETER :: d = 3                    !spatial dimension
  INTEGER, PARAMETER :: vmax = 9                 !Highest Excitation to consider
@@ -14,8 +14,6 @@ PROGRAM s_mat_eval
 
   CALL CPU_TIME(initial_time)
  
- Nsobol=1
- !Nsobol=100000
  ALLOCATE(scrambled_u(d, Nsobol), scrambled_z(d), herm(deg, d), coef(deg, d), A(deg,deg, d))
 !ALLOCATE(v(d,jmax))
 
@@ -28,13 +26,16 @@ PROGRAM s_mat_eval
  CLOSE(UNIT=70)
  !=========================Read in Scrambled Sequence=========================!
 
- open(unit=90, file='testcoef.dat')
+ !open(unit=90, file='testcoef.dat')
 !============ Generates a coef for each spatial dim (deg,s_dim)=============!
   coef(1,:) = 1.0
   coef(2,:) = 1.0 / SQRT(2.)
   DO i = 3,deg
     coef(i,:) = coef(i-1,:) * (1 / SQRT(2.*(i-1)))
   END DO
+! Make Sure the coeficients are working
+  WRITE(*,*) 'Coef Test'
+  WRITE(*,*) coef
 !============ Generates a coef for each spatial dim (deg,s_dim)=============!
 
 
@@ -49,6 +50,9 @@ PROGRAM s_mat_eval
              herm(j,:) =(2.*scrambled_z(:)*herm(j-1,:)) - (2.*(j-2)*herm(j-2,:))
         END DO
         herm(:,:)=herm(:,:)*coef(:,:)
+! Makre Sure the Polynomial works for each dimension.
+        WRITE(*,*) 'Herm test'
+        WRITE(*,*) herm
 !=========================evaluate each sobol point each dimension=========================!
 
 
@@ -64,8 +68,8 @@ PROGRAM s_mat_eval
   
   END DO
 
-!  write(90,*) A
-  close(90) 
+ ! write(90,*) A
+ ! close(90) 
 
 
 !make sure new subroutine works
@@ -76,5 +80,7 @@ PROGRAM s_mat_eval
 !  DEALLOCATE(v)
    CALL CPU_TIME(final_time)
    WRITE(*,*) 'TOTAL TIME: ', final_time - initial_time
+
+
 
 END PROGRAM s_mat_eval
