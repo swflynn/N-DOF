@@ -73,8 +73,8 @@ END FUNCTION beasley_springer_moro
 
 !=================================Permutation Subroutine=================================!
 !========================================================================================!
-! Subroutine Uses the spatial dimesnion d (global parameter) and the maximum excitation
-! Vmax (global Parameter) to first determine Jmax, the number of possible combinations. 
+! Subroutine Uses the spatial dimesnion d and the maximum excitation
+! Vmax to first determine Jmax, the number of possible combinations. 
 ! Next the code writes out an array v(d,Jmax) for our matrix calculation, which contains 
 ! a list of polynomial degrees to satisfy permutations. 
 !========================================================================================!
@@ -266,12 +266,9 @@ j=0
 
 END SUBROUTINE permutation
 
-
 END MODULE NDOF_s_module
 
-
 PROGRAM NDOF_s
-
 USE NDOF_s_module
 
 implicit none
@@ -281,24 +278,21 @@ DOUBLE PRECISION, ALLOCATABLE :: coef(:), scrambled_u(:), scrambled_z(:), herm(:
 INTEGER :: i, j, j1, k, m
 INTEGER Nsobol
 
-! Read in data from control file
+CALL CPU_TIME(initial_time)
+
+!=================================Read input file========================================!
 OPEN(60,FILE='input.dat')
 READ(60,*) Nsobol
 CLOSE(60)
-
-CALL CPU_TIME(initial_time)
+!=================================Read input file========================================!
 
 ALLOCATE(coef(deg), scrambled_u(d), scrambled_z(d), herm(deg,d), A(deg,deg,d))
 
-
 !=================================Coeficient Generation=================================!
-!========================================================================================!
 ! Start By generating the Coeficients for the Hermite Polynomials 
-! All that is needed is deg, d. The output will be a matrix with deg columns and d rows.
-! Each column has the same value, it is the coeficient for the degree polynomial, repeated
 ! for however many spatial dimensions you will be calcualtion. 
-! It would probably be better to make this a function to call, think about changing this
-!========================================================================================!
+! P170 McQuarrie the coef = 1 / (2^v * v!)^.5
+! Coef * Herm = HO Wavefunction
 !========================================================================================!
 coef(1) = 1.0
 coef(2) = 1.0 / SQRT(2.0)
@@ -310,20 +304,10 @@ END DO
 WRITE(*,*) 'Coef Test'
 WRITE(*,*) coef
 ! Make Sure the coeficients are being generated, this can be removed
-
 !=================================Coeficient Generation=================================!
 
-!=================================Sobol Points=================================!
-!========================================================================================!
-! The Scrambled Sobol Points are generated seperatly through a matlab code.
-! We need to open the file containing our points: s_sobol_unif.dat
-! Once we open the file we read it into a matrix scrambled_u(d, Nsobol)
-! This matrix contains d columns with Nsobol points in each column
-!========================================================================================!
-
-! The subroutine gives us Jmax and v(d,Jmax)
+!========================Jmax and v(d,Jmax)=============================================!
 CALL permutation(d,Vmax)
-
 ! Make sure we are calculation all the permutation v(d,Jmax)
 WRITE(*,*) 'Test v'
 WRITE(*,*) v
@@ -331,18 +315,23 @@ WRITE(*,*) 'Test Jmax'
 WRITE(*,*) Jmax
 ALLOCATE(U(Jmax,Jmax))
 U=0d0
+!========================Jmax and v(d,Jmax)=============================================!
 
-
-!=================================Evaluate Sobol Points=================================!
+!=================================Sobol Points=================================!
 !========================================================================================!
+! The Scrambled Sobol Points are generated seperatly through a matlab code.
+! We need to open the file containing our points: s_sobol_unif.dat
 ! For each point use beasley_springer_moro function to convert to a normal distribution
-! make herm for each point up to deg and multiply by coef to get the polynomial for each point
-!========================================================================================!
+! Make herm for each point up to deg and multiply by coef to get the polynomial for each point
 !========================================================================================!
 OPEN(UNIT=70, FILE='s_sobol_unif.dat', STATUS='OLD', ACTION='READ')
 DO i = 1, Nsobol              
   READ(70,*) scrambled_u
+  WRITE(*,*) 'Here is the point'                            ! Just testing remove this after
+  WRITE(*,*) scrambled_u                                    ! Jsut testing remove this after
   scrambled_z(:)=beasley_springer_moro(scrambled_u)
+  WRITE(*,*) 'Here is the transformed point'                ! Just testing remove this after
+  WRITE(*,*) scrambled_z                                    ! Just testing remove this after
   scrambled_z = scrambled_z/SQRT(2.)
   herm(1,:) = 1.0             
   herm(2,:) = 2.0*scrambled_z(:)       
@@ -353,8 +342,8 @@ DO i = 1, Nsobol
      herm(j,:)=herm(j,:)*coef(j)
   enddo
 ! Make Sure the Polynomial works for each dimension/point can be deleted
-!  WRITE(*,*) 'Herm test'
-!  WRITE(*,*) herm
+  WRITE(*,*) 'Herm test'
+  WRITE(*,*) herm
 ! Make Sure the Polynomial works for each dimension/point can be deleted
 
 !=================================Evaluate Herm * Herm =================================!
@@ -388,8 +377,6 @@ DO i = 1, Nsobol
       U(j,j1) = U(j,j1) + B
     END DO
   END DO
-
-
 
 
 ! This end do closes off the loop over all your sobol points    
