@@ -1,6 +1,3 @@
-! 5-17-17 Module For N-Dimensional Scrambled Sobol Calculation
-! Subroutine to determine Jmax, v(d,Jmax) works
-
 MODULE NDOF_s_module
 IMPLICIT NONE
 INTEGER, PARAMETER :: d = 2           ! Spatial Dimension
@@ -280,8 +277,7 @@ USE NDOF_s_module
 implicit none
 REAL :: initial_time, final_time
 DOUBLE PRECISION :: B
-!DOUBLE PRECISION, ALLOCATABLE :: coef(:), scrambled(:), herm(:,:), A(:,:,:), U(:,:)
-DOUBLE PRECISION, ALLOCATABLE :: coef(:), scrambled_u(:), scrambled_z(:), herm(:,:), A(:,:,:), U(:,:) ! test remove scrambled_u,z
+DOUBLE PRECISION, ALLOCATABLE :: coef(:), scrambled_u(:), scrambled_z(:), herm(:,:), A(:,:,:), U(:,:) 
 INTEGER :: i, j, j1, k, m
 INTEGER Nsobol
 
@@ -292,7 +288,6 @@ CLOSE(60)
 
 CALL CPU_TIME(initial_time)
 
-!ALLOCATE(coef(deg), scrambled(d), herm(deg,d), A(deg,deg,d))
 ALLOCATE(coef(deg), scrambled_u(d), scrambled_z(d), herm(deg,d), A(deg,deg,d))
 
 
@@ -409,7 +404,6 @@ ENd DO
 CLOSE(UNIT=80)
 
 DEALLOCATE(coef, scrambled_u, scrambled_z, herm, A, v, U)
-!DEALLOCATE(coef, scrambled, herm, A, v, U)
 CALL CPU_TIME(final_time)
 WRITE(*,*) 'Total Time:', final_time - initial_time
 
