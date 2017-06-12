@@ -3,12 +3,11 @@
 
 MODULE NDOF_s_module
 IMPLICIT NONE
-INTEGER, PARAMETER :: d = 3           ! Spatial Dimension
-INTEGER, PARAMETER :: Vmax = 9        ! Maximum Excitation
+INTEGER, PARAMETER :: d = 2           ! Spatial Dimension
+INTEGER, PARAMETER :: Vmax = 2        ! Maximum Excitation
 INTEGER :: Jmax
 INTEGER, ALLOCATABLE :: v(:,:)
-INTEGER, PARAMETER :: deg = 9         ! Highest Degree Polynomial
-INTEGER, PARAMETER :: Nsobol = 2      ! Number of Sobol Points
+INTEGER, PARAMETER :: deg = 2         ! Highest Degree Polynomial
 
 CONTAINS
 
@@ -266,7 +265,7 @@ j=0
         enddo
      endif
   enddo 
-!write(*,*) v   ! this works, call in actual program
+!write(*,*) v   
 
 END SUBROUTINE permutation
 
@@ -281,14 +280,20 @@ USE NDOF_s_module
 implicit none
 REAL :: initial_time, final_time
 DOUBLE PRECISION :: B
-DOUBLE PRECISION, ALLOCATABLE :: coef(:,:), scrambled_u(:,:), scrambled_z(:), herm(:,:), A(:,:,:), U(:)
-INTEGER :: i, j, k, m, x, y, z
+!DOUBLE PRECISION, ALLOCATABLE :: coef(:), scrambled(:), herm(:,:), A(:,:,:), U(:,:)
+DOUBLE PRECISION, ALLOCATABLE :: coef(:), scrambled_u(:), scrambled_z(:), herm(:,:), A(:,:,:), U(:,:) ! test remove scrambled_u,z
+INTEGER :: i, j, j1, k, m
+INTEGER Nsobol
 
-! Start doing the calculation from the beginning
+! Read in data from control file
+OPEN(60,FILE='input.dat')
+READ(60,*) Nsobol
+CLOSE(60)
 
 CALL CPU_TIME(initial_time)
 
-ALLOCATE(coef(deg,d), scrambled_u(d,Nsobol), scrambled_z(d), herm(deg,d), A(deg,deg,d))
+!ALLOCATE(coef(deg), scrambled(d), herm(deg,d), A(deg,deg,d))
+ALLOCATE(coef(deg), scrambled_u(d), scrambled_z(d), herm(deg,d), A(deg,deg,d))
 
 
 !=================================Coeficient Generation=================================!
@@ -300,15 +305,15 @@ ALLOCATE(coef(deg,d), scrambled_u(d,Nsobol), scrambled_z(d), herm(deg,d), A(deg,
 ! It would probably be better to make this a function to call, think about changing this
 !========================================================================================!
 !========================================================================================!
-coef(1,:) = 1.0
-coef(2,:) = 1.0 / SQRT(2.0)
+coef(1) = 1.0
+coef(2) = 1.0 / SQRT(2.0)
 DO i = 3, deg
-  coef(i,:) = coef(i-1,:) * (1 / SQRT(2.*(i-1)))
+  coef(i) = coef(i-1) * (1 / SQRT(2.*(i-1)))
 END DO
 
 ! Make Sure the coeficients are being generated, this can be removed
-!WRITE(*,*) 'Coef Test'
-!WRITE(*,*) coef
+WRITE(*,*) 'Coef Test'
+WRITE(*,*) coef
 ! Make Sure the coeficients are being generated, this can be removed
 
 !=================================Coeficient Generation=================================!
@@ -320,25 +325,17 @@ END DO
 ! Once we open the file we read it into a matrix scrambled_u(d, Nsobol)
 ! This matrix contains d columns with Nsobol points in each column
 !========================================================================================!
-!========================================================================================!
-OPEN(UNIT=70, FILE='s_sobol_unif.dat', STATUS='OLD', ACTION='READ')
-  READ(70,*) scrambled_u
-CLOSE(UNIT=70)
-! Make sure the points are being read in, this can be removed
-!WRITE(*,*) 'Read in points'
-!WRITE(*,*) scrambled_u
-! Make sure the points are being read in, this can be removed
-!=================================Sobol Points=================================!
-
 
 ! The subroutine gives us Jmax and v(d,Jmax)
 CALL permutation(d,Vmax)
 
 ! Make sure we are calculation all the permutation v(d,Jmax)
-!WRITE(*,*) 'Test v'
-!WRITE(*,*) v
-
-
+WRITE(*,*) 'Test v'
+WRITE(*,*) v
+WRITE(*,*) 'Test Jmax'
+WRITE(*,*) Jmax
+ALLOCATE(U(Jmax,Jmax))
+U=0d0
 
 
 !=================================Evaluate Sobol Points=================================!
@@ -347,15 +344,19 @@ CALL permutation(d,Vmax)
 ! make herm for each point up to deg and multiply by coef to get the polynomial for each point
 !========================================================================================!
 !========================================================================================!
+OPEN(UNIT=70, FILE='s_sobol_unif.dat', STATUS='OLD', ACTION='READ')
 DO i = 1, Nsobol              
-  scrambled_z(:)=beasley_springer_moro(scrambled_u(:,i))
+  READ(70,*) scrambled_u
+  scrambled_z(:)=beasley_springer_moro(scrambled_u)
   scrambled_z = scrambled_z/SQRT(2.)
   herm(1,:) = 1.0             
   herm(2,:) = 2.0*scrambled_z(:)       
   DO j = 3,deg      
     herm(j,:) =(2.*scrambled_z(:)*herm(j-1,:)) - (2.*(j-2)*herm(j-2,:))
   END DO
-  herm(:,:)=herm(:,:)*coef(:,:)
+  do j=1,deg
+     herm(j,:)=herm(j,:)*coef(j)
+  enddo
 ! Make Sure the Polynomial works for each dimension/point can be deleted
 !  WRITE(*,*) 'Herm test'
 !  WRITE(*,*) herm
@@ -368,9 +369,9 @@ DO i = 1, Nsobol
 ! the only difference is that we repeat this same calculation for each spatial dimension
 !========================================================================================!
 !========================================================================================!
-  DO k=1,deg
-    DO m=1,deg
-      A(k,m,:) = herm(k,:)*herm(m,:)
+  DO j=1,deg
+    DO k=1,deg
+      A(j,k,:) = herm(j,:)*herm(k,:)
     END DO
   END DO
 !  WRITE(*,*) 'Test A'
@@ -383,28 +384,32 @@ DO i = 1, Nsobol
 !========================================================================================!
 !========================================================================================!
 
-  ALLOCATE(U(Jmax*Jmax))
-  DO x=1,Jmax
-    DO y=1,x
-      B = A(v(1,x),v(1,y), 1)
-      DO z = 2,d
-        B = B * A(v(z,x),v(z,y),z)
-        END DO 
-      U = U + B
+  DO j=1,Jmax
+    DO j1=j,Jmax
+       B = A(v(d,j),v(d,j1),1)
+      DO m=2,d
+        B = B * A(v(d,j),v(d,j1),m)
+      END DO
+      U(j,j1) = U(j,j1) + B
     END DO
   END DO
 
 
 
 
-
 ! This end do closes off the loop over all your sobol points    
 END DO
-WRITE(*,*) 'U test' 
-WRITE(*,*) U
+close(70)
+U = U/Nsobol
 
+OPEN(UNIT=80, FILE='matrix.dat')
+DO i =1,Jmax
+  WRITE(80,*) U(1:Jmax,i)
+ENd DO
+CLOSE(UNIT=80)
 
 DEALLOCATE(coef, scrambled_u, scrambled_z, herm, A, v, U)
+!DEALLOCATE(coef, scrambled, herm, A, v, U)
 CALL CPU_TIME(final_time)
 WRITE(*,*) 'Total Time:', final_time - initial_time
 
