@@ -332,47 +332,44 @@ DO i = 1, Nsobol
   scrambled_z(:)=beasley_springer_moro(scrambled_u)
   WRITE(*,*) 'Here is the transformed point'                ! Just testing remove this after
   WRITE(*,*) scrambled_z                                    ! Just testing remove this after
-  scrambled_z = scrambled_z/SQRT(2.)
+  scrambled_z = scrambled_z/SQRT(2.)    ! This factor is from definition of normal distribution 
   herm(1,:) = 1.0             
   herm(2,:) = 2.0*scrambled_z(:)       
   DO j = 3,deg      
     herm(j,:) =(2.*scrambled_z(:)*herm(j-1,:)) - (2.*(j-2)*herm(j-2,:))
   END DO
+  WRITE(*,*) 'Herm test'                                    ! Make sure we have proper hermite evaluation
+  WRITE(*,*) herm                                           ! remove once done testing
   do j=1,deg
      herm(j,:)=herm(j,:)*coef(j)
   enddo
 ! Make Sure the Polynomial works for each dimension/point can be deleted
-  WRITE(*,*) 'Herm test'
+  WRITE(*,*) 'Harmonic oscilator test'
   WRITE(*,*) herm
 ! Make Sure the Polynomial works for each dimension/point can be deleted
 
 !=================================Evaluate Herm * Herm =================================!
-!========================================================================================!
 ! Make a Matrix A that evaluates herm(deg)*herm(deg) 
 ! A is a colllection of 1D calculations from before it contains all of the polynomial products
 ! the only difference is that we repeat this same calculation for each spatial dimension
-!========================================================================================!
 !========================================================================================!
   DO j=1,deg
     DO k=1,deg
       A(j,k,:) = herm(j,:)*herm(k,:)
     END DO
   END DO
-!  WRITE(*,*) 'Test A'
-!  WRITE(*,*) A
-
+  WRITE(*,*) 'Test A'                                     ! check HO * HO evaluations for each dimension
+  WRITE(*,*) A                                            ! remove this line after we get it working
 
 !=================================Evaluate Matrix Elements =================================!
-!========================================================================================!
 ! Our matrix U will contains the matrix elements 
-!========================================================================================!
 !========================================================================================!
 
   DO j=1,Jmax
     DO j1=j,Jmax
-       B = A(v(d,j),v(d,j1),1)
+       B = A(v(1,j),v(1,j1),1)
       DO m=2,d
-        B = B * A(v(d,j),v(d,j1),m)
+        B = B * A(v(m,j),v(m,j1),m)
       END DO
       U(j,j1) = U(j,j1) + B
     END DO
@@ -381,13 +378,13 @@ DO i = 1, Nsobol
 
 ! This end do closes off the loop over all your sobol points    
 END DO
-close(70)
+CLOSE(70)
 U = U/Nsobol
 
 OPEN(UNIT=80, FILE='matrix.dat')
 DO i =1,Jmax
   WRITE(80,*) U(1:Jmax,i)
-ENd DO
+END DO
 CLOSE(UNIT=80)
 
 DEALLOCATE(coef, scrambled_u, scrambled_z, herm, A, v, U)
