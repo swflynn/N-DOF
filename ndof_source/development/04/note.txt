@@ -1,0 +1,5 @@
+6-21-17
+
+I am planning to remove the deg functiona s it is accounted for in the v calculation in permutation.
+We specify all of our permutations with d and Vmax, therefore deg is redundant.
+This code is the last version using the deg paramater

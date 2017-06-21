@@ -1,0 +1,7 @@
+Attempting to get code to work
+
+As of now everything except for the matrix elements works properly for N-dimensions
+
+6-16-17
+Going to make another directory to re-write code again
+This time I am going to make changes to the code from Vlad suggestions namely remove the coeficients from the claculations and get the matrix working

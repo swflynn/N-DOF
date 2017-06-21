@@ -1,9 +1,0 @@
-!!!!! 6-5-17!!!!!
-Keep this directory until I have a working scrambled and non scrambled analysis!
-
-The functions Sandra wrote DO NOT work when I place them within a module
-On 5-17-17 Vladimir changed Sandra's code to get them working
-I have used the changed code in my module. 
-
-I may need this formulation of the function when I work with the non-scrambled analysis.
-
