@@ -1,9 +1,9 @@
 % Script to generate scrambled sobol sequence in matlab
 
 %define points, skip, dimensionality of the sequence
-Nsobol = 100000;
-Nsobol_skip = 10000;
-d = 1;
+Nsobol = 100;
+Nsobol_skip = 100;
+d = 3;
 
 % generate the sequence and save it to a file
 points = (sobolset(d, 'Skip', Nsobol_skip));

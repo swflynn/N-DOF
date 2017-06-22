@@ -1,0 +1,18 @@
+Workign code for scrambled any dimension analysis
+Necessary files:
+compile.sh                          ! Bash compile file for convenience
+s_sobol_unif.dat                    !Contains the scrambled sobol points
+input.dat                           ! Input file for the code
+
+Compile the Code:
+On terminal in this directory type 
+bash compile.sh                     ! Executes the compile.sh file
+
+input.dat:
+Nsobol                              !Integer; number of points in s_sobol_unif.dat
+
+s_sobol_unif.dat:
+d-dim points on each line, Nsobol lines total
+
+Output:
+matrix.dat                          !U(Jmax,Jmax) matrix 
