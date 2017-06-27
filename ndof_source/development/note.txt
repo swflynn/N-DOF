@@ -1,2 +1,0 @@
-Code Development for generating N-Dimensional scrambled sobol analysis
-Trying to first verify the diagonal and off diagonal elements converge
