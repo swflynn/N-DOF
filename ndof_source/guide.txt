@@ -1,9 +1,0 @@
-At this level you can find the program MAIN and the associated module within the directory ndof_final.
-
-All code being developed is placed within development. 
-
-All individual programs and pieces of working code are placed within test once they are properly working.
-This code will be docuemnted heavily with regards to what task is being completed.
-
-The ndof_final directory contains the polished working program as a whole, and is updated as development is made. 
-This code is minimalist, comments and progress can be found in test. 
