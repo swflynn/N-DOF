@@ -1,7 +1,0 @@
-Attempting to get code to work need a matrix
-6-16-17
-Changes the loop for coeficient generation 
-
-Vladimir owuld like me to work ont he code on Dropbox, so I will take this code and place it on dropbox and do development there. 
-I will still place things on github for my own source control. 
-
