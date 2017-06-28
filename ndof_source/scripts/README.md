@@ -19,3 +19,9 @@ Taken from http://people.sc.fsu.edu/~jburkardt/f_src/sobol/sobol.html
 ### 1D_HO_matrix:
 Fortran-90 script for calculating a 1D Harmonic Oscilator matrix (weighted by a Gaussian). 
 The code allows users to define which degree polynomial to calculate up to for the HO Matrix elements, and uses Normally Distributed Sobol Points for quasi-Monte Carlo integration. 
+
+### 1D_s_HO_matrix:
+Fortran-90 script for calculating a 1D Harmonic Oscilator matrix (weighted by a Gaussian).
+The code allows users to define which degree polynomial to calculate up to for the HO Matrix elements, and uses Normally Distributed Scrambled Sobol Points for quasi-Monte Carlo integration. 
+The points must be generated externally (a matlab script has been attached for doing this) see
+https://www.mathworks.com/help/stats/qrandset.scramble.html for matlab details. 
