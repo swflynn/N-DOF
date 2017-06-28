@@ -1,7 +1,0 @@
-Take any degree Hermite polynomial from 0-10, and to output the evaluation of this polynomial for any value of x. 
-
-The take away from running these calculations and comparing to the calculated value (using mathematica) is that for even small values of x the polynomials 7 and higher do not properly evaluate.
-
-It is numerically unstable to evaluate each degree for a given polynomial, these will need to be calculated using recursion. 
-
-See  unif_sob_herm directory for this method. 
