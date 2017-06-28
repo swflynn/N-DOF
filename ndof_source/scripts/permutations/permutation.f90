@@ -1,13 +1,12 @@
-! 5-17-17 
 ! Script to calculate the total number of permutations, Jmax, for: 
-! Psi(v) = Psi(v1,v2...v_d); v1+v2+...vd <= Vmax as a constraint
-! Code works for d leq 9 only, works for any Vmax (warnings if dim not== 9, works fine)
-! The code takes your spatial dimension and vmax criteria and determines Jmax, v(spatial_dim,Jmax). 
+
+! For a wave function of d spatial dimensions Psi(v) = Psi(v1,v2...v_d); <= 9
+! Given a constaint on total number of excitations for the system v1+v2+...vd <= Vmax 
+! Calculate the number of permutations; Jmax
+! With Jmax populate v(spatial_dimension,Jmax) with all the possible combinations
 
 !============================================================================================!
-!============================================================================================!
 !=======================================Begin Script=========================================!
-!============================================================================================!
 !============================================================================================!
 PROGRAM perm
 IMPLICIT NONE
@@ -16,6 +15,8 @@ INTEGER, PARAMETER :: spatial_dim=3
 INTEGER, PARAMETER :: Vmax=3
 integer :: j,Vm(Spatial_dim),vv(Spatial_dim),k,v1,v2,v3,v4,v5,v6,v7,v8,v9, Jmax
 INTEGER, ALLOCATABLE :: v(:,:)
+
+! Determine Jmax for defined spatial dimension and Maximum Excitation
 
 Jmax = 0
 j=0
@@ -203,3 +204,5 @@ write(*,*) v
 DEALLOCATE(v)
 
 END Program perm
+
+! Code is working as of 5-17-17 
