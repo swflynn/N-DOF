@@ -1,10 +1,12 @@
 ! Code to calculate integral of a function using uniform distribution of sobol points
+
 ! Call the sobol.f90 module to generate a sequence of sobol points
-!We then use these point to do a MC integral numerically over a function defined in the program. 
-! To use:
-!specify your spatial dimension: m, number of points to generate: n, number of points to skip when generating: seed
-! Output prints integral of interest numerically. 
-!This code is working properly 3/8/17 -Shane
+!Then do MC integration numerically over a function defined in the program. 
+
+!======================================TO USE================================================! 
+!Specify spatial dimension: m, Number of Sobol Points to generate: n, Skip when generating: seed (set the same as n)
+! Output prints integral of interest numerical solution
+!======================================TO USE================================================! 
 
 PROGRAM unif_sobol_points
       USE  sobol
@@ -17,16 +19,16 @@ PROGRAM unif_sobol_points
       REAL*8 :: f
 
 
-      m = 1                   !spatial dimension
-      n = 100               !number of sobol points generated
-      skip = 0                !starting sobol point
-      end_val = 10.0          !Integral bounds
+      m = 1                                         !spatial dimension
+      n = 100                                       !number of sobol points generated
+      skip = 100                                    !starting sobol point
+      end_val = 10.0                                !Integral bounds
       start_val = 0.0
-      int_range = end_val - start_val  !range of integral to normalize MC
-      f = 0.0D0               ! initialize values for integral
+      int_range = end_val - start_val               !range of integral to normalize MC
+      f = 0.0D0                                     ! initialize values for integral
       integral = 0.0
 
-      ALLOCATE (r(m,n))       !allocate space for arrays
+      ALLOCATE (r(m,n))       
       ALLOCATE (q(m,n))       
 
 !Call the module to generate a uniform sobol sequence
@@ -45,7 +47,8 @@ PROGRAM unif_sobol_points
       integral = (end_val-start_val)*f
 
 ! Here is the numerical approximation of the integral!
-      PRINT *, integral
+      WRITE(*,*) 'The numerical Integral is'
+      WRITE(*,*) integral
         
 ! Function that we are trying to integrate
 CONTAINS
@@ -58,3 +61,5 @@ CONTAINS
       END FUNCTION integrand
 
 END PROGRAM unif_sobol_points
+
+!This code is working properly 3/8/17 -Shane
