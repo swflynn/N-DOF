@@ -1,38 +1,49 @@
-!Code to calculate HO matrix elements using normal sobol sequence with convergence analysis (for a single dimension only). 
- 
-!User should set what degree (deg) polynomial they would like to calculate up to
-!Then set the Nsobol number of points to use and the skip
-!Code generates a sequence of normally distributed sobol points 'norm' valid for 1 dimension (using sobol.f90 and sobol_stdnormal.f90 functions+subroutines). 
-!Then calculates using recursion the HO wavefunction coeficients
-!Then the hermite polynomials are calculated recursively
-!Finally the matrix elements are calculated by the product of the hermite polynomials and coeficients. 
+!Code to calculate 1D-HO matrix elements using normal sobol sequence 
+!Matrix Element convergence analysis 
 
-!Everything is working as of 3-20-17   -Shane 
+!=========================================To Use=============================================!
+!Set what degree (deg) polynomial they would like to calculate up to
+!===============  NOTE: Indexing starts at 1 therefore deg = 10 := H_9 ======================!
+!Set the Nsobol number of points to use for the integration (in general set skip = Nsobol )
+!===============  NOTE: Matrix Elements for Spatial Dimension (d) = 1 only===================!
+! User should also set an appropriate number of convergence evaluations
+!Code generates a sequence of NORMALLY distributed sobol points 'norm' using sobol.f90 and sobol_stdnormal.f90
+! Recursion is used to calculate the HO Wavefunction Coefficients
+! Recursion is used to calculate the Hermite Poynomials 
+! The HO Wavefucntion is contructed as the product of the Coeficients and Polynomials
+!=========================================To Use=============================================!
+
 PROGRAM mat_eval
   
   USE sobol
   IMPLICIT NONE
-  INTEGER :: d, Nsobol                  ! dimension and number of points
-  INTEGER :: n, i, j, k, m, o, p         !iterative variables
-  INTEGER, PARAMETER :: deg = 10       !polynomial we want to calculate up to
-  INTEGER*8 :: skip                    !set similar to Nsobol
+  INTEGER :: Nsobol                           ! Number of Sobol Points
+  INTEGER :: n, i, j, k, m, o, p         
+  INTEGER, PARAMETER :: d = 1                 ! Code for 1D case Only
+  INTEGER:: deg = 10                          !polynomial we want to calculate up to
+  INTEGER*8 :: skip                           !seed, set = Nsobol
   DOUBLE PRECISION, ALLOCATABLE:: norm(:,:)   !vector of normal sobol points
   DOUBLE PRECISION, DIMENSION(1:10) :: herm, coef    !hermite polynomial and coef vectors
   DOUBLE PRECISION, DIMENSION(1:10, 1:10) :: A     ! matrix elements
+	REAL :: initial_time, final_time
+!=============================Variables to be set by User==================================!
+  deg = 10                                    ! Indexing starts at 1 not 0!
+  Nsobol = 10000000
+  skip = 10000000
+!=============================Variables to be set by User==================================!
 
-  d = 1                           
-  Nsobol = 100
-  skip = 100
+CALL CPU_TIME(initial_time)
+
   ALLOCATE (norm(d,Nsobol))
   A=0d0
-!=========================Get each sobol pointpoint=========================!
+!==============================Get each sobol pointpoint===================================!
   DO n = 1, Nsobol                
     CALL sobol_stdnormal(d,skip,norm(:,n))
   END DO
   norm=norm/SQRT(2.)      
-!=========================Get each sobol pointpoint=========================!
+!=============================Get each sobol pointpoint====================================!
 
-!=========================Get each wavefn coef.=========================!
+!=============================Get each wavefn coef.========================================!
   coef(1) = 1
   coef(2) = 1.0 / (SQRT(2.0))
   DO p = 3,deg
@@ -59,7 +70,7 @@ DO i = 1, Nsobol
  !=============evaluate each matrix element for a single point======================!
 
 ! add in function to print results as a function of N
-  IF (mod(i,10)==0) THEN
+  IF (mod(i,1000000)==0) THEN
       WRITE(9,*) (A) / REAL(i)
   END IF
 
@@ -68,7 +79,7 @@ DO i = 1, Nsobol
   CLOSE(9)
 !=========================evaluate each sobol point=========================!
   A = A / Nsobol
-!=========================write out matrix elements=========================!
+!=========================write out Final Matrix =========================!
   OPEN(UNIT=10, FILE='final_matrix.dat')
   do o=1,deg
      Write(10,*) A(1:deg,o)
@@ -76,4 +87,16 @@ DO i = 1, Nsobol
   CLOSE(10)
 !=========================write out matrix elements=========================!
 
+!============================Output File====================================!
+OPEN(UNIT=83, FILE='output.dat')
+WRITE(83,*) 'Sobol Numers = ', Nsobol
+WRITE(83,*) 'Polynomial Degree= ', deg
+WRITE(83,*) 'This calculation ran for (s): ', final_time - initial_time
+CLOSE(UNIT=83)
+
+CALL CPU_TIME(final_time)
+WRITE(*,*) 'Total Time:', final_time - initial_time
+
 END PROGRAM mat_eval
+
+!Everything is working as of 3-20-17   -Shane 
