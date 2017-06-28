@@ -1,3 +1,5 @@
+! Module taken from http://people.sc.fsu.edu/~jburkardt/f_src/sobol/sobol.html
+
 module sobol
 contains
 FUNCTION i8_bit_hi1 ( n )
