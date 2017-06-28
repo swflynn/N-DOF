@@ -20,7 +20,7 @@ PROGRAM mat_eval
   INTEGER :: Nsobol                           ! Number of Sobol Points
   INTEGER :: n, i, j, k, m, o, p         
   INTEGER, PARAMETER :: d = 1                 ! Code for 1D case Only
-  INTEGER:: deg = 10                          !polynomial we want to calculate up to
+  INTEGER:: deg                               !polynomial we want to calculate up to
   INTEGER*8 :: skip                           !seed, set = Nsobol
   DOUBLE PRECISION, ALLOCATABLE:: norm(:,:)   !vector of normal sobol points
   DOUBLE PRECISION, DIMENSION(1:10) :: herm, coef    !hermite polynomial and coef vectors
@@ -28,8 +28,8 @@ PROGRAM mat_eval
 	REAL :: initial_time, final_time
 !=============================Variables to be set by User==================================!
   deg = 10                                    ! Indexing starts at 1 not 0!
-  Nsobol = 10000000
-  skip = 10000000
+  Nsobol = 1000000000
+  skip = 1000000000
 !=============================Variables to be set by User==================================!
 
 CALL CPU_TIME(initial_time)
@@ -70,7 +70,7 @@ DO i = 1, Nsobol
  !=============evaluate each matrix element for a single point======================!
 
 ! add in function to print results as a function of N
-  IF (mod(i,1000000)==0) THEN
+  IF (mod(i,10000000)==0) THEN
       WRITE(9,*) (A) / REAL(i)
   END IF
 
@@ -86,6 +86,8 @@ DO i = 1, Nsobol
   enddo
   CLOSE(10)
 !=========================write out matrix elements=========================!
+CALL CPU_TIME(final_time)
+WRITE(*,*) 'Total Time:', final_time - initial_time
 
 !============================Output File====================================!
 OPEN(UNIT=83, FILE='output.dat')
@@ -94,8 +96,6 @@ WRITE(83,*) 'Polynomial Degree= ', deg
 WRITE(83,*) 'This calculation ran for (s): ', final_time - initial_time
 CLOSE(UNIT=83)
 
-CALL CPU_TIME(final_time)
-WRITE(*,*) 'Total Time:', final_time - initial_time
 
 END PROGRAM mat_eval
 
