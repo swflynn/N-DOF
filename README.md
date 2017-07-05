@@ -4,8 +4,7 @@ The code utilizes quasi Monte Carlo methods for matrix element calculations, wit
 Matrix Elements Convergence and Eigenvalue Convergence available. 
 
 ## Author:
-Copyright (C) 2017 Shane Flynn -UCI
-
+Shane Flynn, Vladimir Mandelshtam. 2017. UCI
 ### References:
 For motivation of the method see:
 http://aip.scitation.org/doi/abs/10.1063/1.4829836 
