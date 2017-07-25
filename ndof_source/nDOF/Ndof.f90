@@ -201,15 +201,15 @@ USE NDOF_module
 IMPLICIT NONE
 REAL :: initial_time, final_time
 DOUBLE PRECISION :: B
-DOUBLE PRECISION, ALLOCATABLE :: scrambled_z(:), herm(:,:), A(:,:,:), U(:,:), C(:,:),FV1(:),FV2(:),eigenvalues(:)
-INTEGER :: i, j, j1, k, m, n, IERR
-INTEGER :: Nsobol
-INTEGER*8 :: skip
+DOUBLE PRECISION, ALLOCATABLE :: scrambled_z(:), herm(:,:), A(:,:,:), U(:,:), U1(:,:)
+DOUBLE PRECISION, ALLOCATABLE :: C(:,:), FV1(:), FV2(:), eigenvalues(:)
+INTEGER :: j, j1, k, m, n, IERR, Nsobol
+INTEGER*8 :: i, skip
 
 CALL CPU_TIME(initial_time)
 
-Nsobol = 10000000
-skip = 10000000 
+Nsobol = 1000000
+skip = 1000000 
 ALLOCATE(scrambled_z(d), herm(0:Vmax,d), A(0:Vmax,0:Vmax,d))
 
 !========================Jmax and v(d,Jmax)=============================================!
@@ -220,8 +220,10 @@ CALL permutation(d,Vmax)
 !WRITE(*,*) 'Jmax = ', Jmax                      ! remove once done testing
 !WRITE(*,*) 'Test v'                         ! remove these once done testing, v is large
 !WRITE(*,*) v                                ! remove once done testing
-ALLOCATE(U(Jmax,Jmax),C(Jmax,Jmax),FV1(Jmax),FV2(Jmax),eigenvalues(Jmax))                      !Allocate our matrix elements
+ALLOCATE(U(Jmax,Jmax), U1(Jmax,Jmax), C(Jmax,Jmax), FV1(Jmax), FV2(Jmax))
+ALLOCATE(eigenvalues(Jmax))                      !Allocate our matrix elements
 U=0d0
+U1=0d0
 !========================Jmax and v(d,Jmax)=============================================!
 
 !=================================Sobol Points=================================!
@@ -256,10 +258,9 @@ DO i = 1, Nsobol
 !  WRITE(*,*) 'Test A'                                     ! check HO * HO evaluations for each dimension
 !  WRITE(*,*) A                                            ! remove this line after we get it working
 
-!=================================Evaluate Matrix Elements =================================!
-! Our matrix U will contains the matrix elements 
+!==============================Evaluate Matrix Elements =================================!
+! Our matrix U will contains the matrix elements U1 for partial average
 !========================================================================================!
-
   DO j=1,Jmax         ! Loop over jmax
     DO j1=j,Jmax 
       B=A(v(1,j),v(1,j1),1)
@@ -269,25 +270,24 @@ DO i = 1, Nsobol
       U(j1,j) = U(j1,j) + B
     END DO
   END DO
-
-  if(mod(i,100000)==0) then
-     C=U/i
-!   DO j =1,Jmax
-      WRITE(80,*) i, C !Writes entire matrix out
-!   END DO
-!   write(80,*)
-   flush(80)
-   call RS(Jmax,Jmax,C,eigenvalues,0,B,FV1,FV2,IERR) 
-   write(81,*) i, ABS(1-eigenvalues(:))
-  flush(81)
-endif
+! Write out partial average and flush
+  if(mod(i,10000)==0) then
+    U = U + U1
+    U1 = 0d0
+    C=U/i
+    WRITE(80,*) i, C !Writes entire matrix out
+    call RS(Jmax,Jmax,C,eigenvalues,0,B,FV1,FV2,IERR) 
+    write(81,*) i, ABS(1-eigenvalues(:))
+    flush(80)
+    flush(81)
+  endif
 
 ! This end do closes off the loop over all your sobol points    
 END DO
 CLOSE(UNIT=80)
 CLOSE(UNIT=81)
 
-DEALLOCATE(scrambled_z, herm, A, v, U)
+!DEALLOCATE(scrambled_z, herm, A, v, U, U1, C)
 CALL CPU_TIME(final_time)
 WRITE(*,*) 'Total Time:', final_time - initial_time
 
