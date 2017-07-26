@@ -157,9 +157,6 @@ j=0
            endif
         enddo 
       Jmax = j
-!      WRITE(*,*) 'Spatial Dimension = ', d 
-!      WRITE(*,*) 'max excitation = ', Vmax
-!      WRITE(*,*) 'Jmax = ', Jmax
 !==================With Jmax, Run again to determine v(d,Jmax)===========================!
 ALLOCATE(v(d,Jmax))
 
@@ -273,8 +270,10 @@ USE NDOF_s_module
 IMPLICIT NONE
 REAL :: initial_time, final_time
 DOUBLE PRECISION :: B
-DOUBLE PRECISION, ALLOCATABLE :: scrambled_u(:), scrambled_z(:), herm(:,:), A(:,:,:), U(:,:), C(:,:),FV1(:),FV2(:),eigenvalues(:)
-INTEGER :: i, j, j1, k, m, n, IERR
+DOUBLE PRECISION, ALLOCATABLE :: scrambled_u(:), scrambled_z(:), herm(:,:), A(:,:,:)
+DOUBLE PRECISION, ALLOCATABLE :: U(:,:), U1(:,:), C(:,:), FV1(:), FV2(:), eigenvalues(:)
+INTEGER :: j, j1, k, m, n, IERR
+INTEGER*8 :: i    ! set looping integer for Nsobol to more precision just in case
 INTEGER Nsobol
 
 CALL CPU_TIME(initial_time)
@@ -289,42 +288,34 @@ ALLOCATE(scrambled_u(d), scrambled_z(d), herm(0:Vmax,d), A(0:Vmax,0:Vmax,d))
 
 !========================Jmax and v(d,Jmax)=============================================!
 CALL permutation(d,Vmax)
-! Make sure we are calculating all the permutation v(d,Jmax) 
 WRITE(*,*) 'spacial dimensions = ', d
 WRITE(*,*) 'Maximum Excitation = ', Vmax
-WRITE(*,*) 'Jmax = ', Jmax                      ! remove once done testing
-WRITE(*,*) 'Test v'                         ! remove these once done testing, v is large
-WRITE(*,*) v                                ! remove once done testing
-ALLOCATE(U(Jmax,Jmax),C(Jmax,Jmax),FV1(Jmax),FV2(Jmax),eigenvalues(Jmax))                      !Allocate our matrix elements
+WRITE(*,*) 'Jmax = ', Jmax                      
+ALLOCATE(U(Jmax,Jmax), U1(Jmax,Jmax), C(Jmax,Jmax), FV1(Jmax), FV2(Jmax)) 
+ALLOCATE(eigenvalues(Jmax))                      !Allocate matrix elements
 U=0d0
+U1=0d0    ! This is for partial averaging
 !========================Jmax and v(d,Jmax)=============================================!
 
 !=================================Sobol Points=================================!
 !========================================================================================!
 ! The Scrambled Sobol Points are generated seperatly through a matlab code.
 ! We need to open the file containing our points: s_sobol_unif.dat
-! For each point use beasley_springer_moro function to convert to a normal distribution
+! Use beasley_springer_moro function to convert points from uniform to normal 
 ! Make herm for each point up to deg we have redefined the Hermite Polynomial
-! Therefore we no longer have a coeficient (our definition or,alized them)
 !========================================================================================!
 OPEN(UNIT=70, FILE='s_sobol_unif.dat', STATUS='OLD', ACTION='READ')
 OPEN(UNIT=80, FILE='matrix.dat')
 OPEN(UNIT=81, FILE='eigenvalues.dat')
 DO i = 1, Nsobol              
   READ(70,*) scrambled_u
-  !WRITE(*,*) 'Here is the point'                            ! Just testing remove this after
-  !WRITE(*,*) scrambled_u                                    ! Just testing remove this after
   scrambled_z(:)=beasley_springer_moro(scrambled_u)
-  scrambled_z = scrambled_z/SQRT(2.)    ! This factor is from definition of normal distribution
-!  WRITE(*,*) 'Here is the transformed point'                ! Just testing remove this after
-!  WRITE(*,*) scrambled_z                                    ! Just testing remove this after
+  scrambled_z = scrambled_z/SQRT(2.)    ! factor from definition of normal distribution
   herm(0,:) = 1.0                       ! Re-normalized hermite polynomial now
   herm(1,:) = SQRT(2.)*scrambled_z(:)       
   DO j = 2,Vmax      
     herm(j,:) = (SQRT(2./j)*scrambled_z(:)*herm(j-1,:)) - (SQRT(((j-1d0)/j))*herm(j-2,:))
   END DO
-!  WRITE(*,*) 'Herm test'                                    ! Make sure we have proper hermite evaluation
-!  WRITE(*,*) herm                                           ! remove once done testing
 !=================================Evaluate Herm * Herm =================================!
 ! Make a Matrix A that evaluates herm(deg)*herm(deg) 
 ! A is a colllection of 1D calculations from before it contains all of the polynomial products
@@ -335,45 +326,35 @@ DO i = 1, Nsobol
       A(m,n,:) = herm(m,:)*herm(n,:)
     END DO
   END DO
-  !WRITE(*,*) 'Test A'                     ! check HO * HO evaluations for each dimension
-  !WRITE(*,*) A                       ! remove this line after we get it working
-
-!=================================Evaluate Matrix Elements =================================!
-! Our matrix U will contains the matrix elements 
+!==============================Evaluate Matrix Elements =================================!
+! Our matrix U will contains the matrix elements, U1 is for partial averaging 
 !========================================================================================!
-
   DO j=1,Jmax         ! Loop over jmax
     DO j1=j,Jmax 
       B=A(v(1,j),v(1,j1),1)
       DO k=2,d
         B=B*A(v(k,j),v(k,j1),k)
       END DO
-      U(j1,j) = U(j1,j) + B
+      U1(j1,j) = U1(j1,j) + B
     END DO
   END DO
+!==========================write out and flush partial averaging=========================!
+  if(mod(i,10000)==0) then
+    U = U + U1
+    U1 = 0d0
+    C = U/i
+    WRITE(80,*) i, C    ! Write out entire matrix
+    call RS(Jmax,Jmax,C,eigenvalues,0,B,FV1,FV2,IERR) 
+    write(81,*) i, ABS(1-eigenvalues(:))       ! 1-eigenvalue to plot error
+    FLUSH(80)
+    FLUSH(81)
+  END IF 
 
-!Evaluation of convergence
-  if(mod(i,1000000)==0) then
-     C=U/i
-!   write(80,*) '******* Nsobol=',i,'*****' not convenient for analysis
-!   DO j =1,Jmax          Not sure why we have a do loop here - Shane 7-1-17
-     WRITE(80,*) i, C !Writes entire matrix out
-      !  WRITE(80,*) U(:,i)
-!   END DO
-     write(80,*)
-     flush(80)
-     call RS(Jmax,Jmax,C,eigenvalues,0,B,FV1,FV2,IERR) 
-     write(81,*) i, ABS(1-eigenvalues(:))       ! should be 1 get 1-eigenvalue to plot 
-     flush(81)
-  endif
-
-! This end do closes off the loop over all your sobol points    
-END DO
+END DO      ! This enddo closes loop over sobol points
 CLOSE(70)
 CLOSE(UNIT=80)
 CLOSE(UNIT=81)
 
-!DEALLOCATE(scrambled_u, scrambled_z, herm, A, v, U)
 CALL CPU_TIME(final_time)
 WRITE(*,*) 'Total Time:', final_time - initial_time
 
