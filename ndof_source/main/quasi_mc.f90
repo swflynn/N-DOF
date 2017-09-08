@@ -1,7 +1,7 @@
 MODULE NDOF_module
 IMPLICIT NONE
-INTEGER, PARAMETER :: d = 3           ! Spatial Dimension
-INTEGER, PARAMETER :: Vmax = 9        ! Maximum Excitation
+INTEGER, PARAMETER :: d = 3           
+INTEGER, PARAMETER :: Vmax = 9       
 INTEGER :: Jmax
 INTEGER, ALLOCATABLE :: v(:,:)
 
@@ -85,8 +85,6 @@ j=0
            endif
         enddo 
       Jmax = j
-!      WRITE(*,*) 'Spatial Dimension = ', d 
-!      WRITE(*,*) 'max excitation = ', Vmax
 !      WRITE(*,*) 'Jmax = ', Jmax
 !==================With Jmax, Run again to determine v(d,Jmax)===========================!
 ALLOCATE(v(d,Jmax))
@@ -219,22 +217,11 @@ IFLAG = 3
 
 ALLOCATE(scrambled_z(d), herm(0:Vmax,d), A(0:Vmax,0:Vmax,d))
 
-!========================Jmax and v(d,Jmax)=============================================!
 CALL permutation(d,Vmax)
-! Make sure we are calculating all the permutation v(d,Jmax) 
-!WRITE(*,*) 'spacial dimensions = ', d
-!WRITE(*,*) 'Maximum Excitation = ', Vmax
-!WRITE(*,*) 'Jmax = ', Jmax                      ! remove once done testing
-!WRITE(*,*) 'Test v'                         ! remove these once done testing, v is large
-!WRITE(*,*) v                                ! remove once done testing
 ALLOCATE(U(Jmax,Jmax),C(Jmax,Jmax),FV1(Jmax),FV2(Jmax),eigenvalues(Jmax))         
 U=0d0
-!========================Jmax and v(d,Jmax)=============================================!
-
-!=================================Sobol Points=================================!
 !========================================================================================!
-! Make herm for each point up to deg we have redefined the Hermite Polynomial
-! Therefore we no longer have a coeficient (our definition or,alized them)
+! Make herm up to deg, we have redefined the Hermite Polynomials coeficients
 !========================================================================================!
 OPEN(UNIT=80, FILE='matrix.dat')
 OPEN(UNIT=81, FILE='eigenvalues.dat')
@@ -242,35 +229,25 @@ CALL INSSOBL(FLAG,d,Nsobol,TAUS,scrambled_z,MAX,IFLAG)
 DO i = 1, Nsobol
   CALL GOSSOBL(scrambled_z)
   CALL sobol_stdnormal(d, scrambled_z)
-  
-!  WRITE(*,*) 'Here is the transformed point'                            ! Just testing remove this after
-!  WRITE(*,*) scrambled_z                                    ! Just testing remove this after
-  scrambled_z = scrambled_z/SQRT(2.)    ! This factor is from definition of normal distribution
-  herm(0,:) = 1.0                       ! Re-normalized hermite polynomial now
+  scrambled_z = scrambled_z/SQRT(2.)    ! Factor from definition of normal distribution
+  herm(0,:) = 1.0                       
   herm(1,:) = SQRT(2.)*scrambled_z(:)       
   DO j = 2,Vmax      
     herm(j,:) = (SQRT(2./j)*scrambled_z(:)*herm(j-1,:)) - (SQRT(((j-1d0)/j))*herm(j-2,:))
   END DO
-!  WRITE(*,*) 'Herm test'                           ! Make sure we have proper hermite evaluation
-!  WRITE(*,*) herm                                           ! remove once done testing
 !=================================Evaluate Herm * Herm =================================!
 ! Make a Matrix A that evaluates herm(deg)*herm(deg) 
-! A is a colllection of 1D calculations from before it contains all of the polynomial products
-! the only difference is that we repeat this same calculation for each spatial dimension
+! A is a colllection of 1D calculations, contains all of the polynomial products
 !========================================================================================!
   DO m=0,Vmax
     DO n=0,Vmax
       A(m,n,:) = herm(m,:)*herm(n,:)
     END DO
   END DO
-!  WRITE(*,*) 'Test A'                                     ! check HO * HO evaluations for each dimension
-!  WRITE(*,*) A                                            ! remove this line after we get it working
-
 !=================================Evaluate Matrix Elements =================================!
-! Our matrix U will contains the matrix elements 
-!========================================================================================!
-
-  DO j=1,Jmax         ! Loop over jmax
+! Matrix U will contains the Potential Energy Matrix Elements 
+!===========================================================================================!
+  DO j=1,Jmax         
     DO j1=j,Jmax 
       B=A(v(1,j),v(1,j1),1)
       DO k=2,d
@@ -280,27 +257,20 @@ DO i = 1, Nsobol
     END DO
   END DO
 
-  if(mod(i,100000)==0) then
+  if(mod(i,100000)==0) then       ! set your convergence analysis criteria
      C=U/i
-!   DO j =1,Jmax
-      WRITE(80,*) i, C !Writes entire matrix out
-!   END DO
-!   write(80,*)
+      WRITE(80,*) i, C 
    flush(80)
    call RS(Jmax,Jmax,C,eigenvalues,0,B,FV1,FV2,IERR) 
    write(81,*) i, ABS(1-eigenvalues(:))
   flush(81)
 endif
-
-! This end do closes off the loop over all your sobol points    
-END DO
+END DO ! This closes off loop over sobol points
 CLOSE(UNIT=80)
 CLOSE(UNIT=81)
 
-DEALLOCATE(scrambled_z, herm, A, v, U)
 CALL CPU_TIME(final_time)
 WRITE(*,*) 'Total Time:', final_time - initial_time
-
 OPEN(UNIT=83, FILE='output.dat')
 WRITE(83,*) 'Scramble method= ', IFLAG
 WRITE(83,*) 'Sobol Numbers = ', Nsobol
