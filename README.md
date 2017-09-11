@@ -16,17 +16,20 @@ Shane Flynn, Vladimir A. Mandelshtam. 2017. UCI
 #### General Method and Application Overview
 http://aip.scitation.org/doi/abs/10.1063/1.4829836 
 
-#### Numerical Method Motivation:
+#### Numerical Methods
 http://aip.scitation.org/doi/abs/10.1063/1.4788977
 http://aip.scitation.org/doi/abs/10.1063/1.4754819
 
-#### Local Monomer Approach
+#### Local Monomer Approximation
 http://pubs.acs.org/doi/abs/10.1021/jp5061182
 
 #### Potential Energy Surfaces
 http://paesanigroup.ucsd.edu/index.html
+
 http://pubs.acs.org/doi/pdf/10.1021/ct400863t
 
 #### Quasi MC Code:
-We are currently utilizing the scrambled sobol Fortran code made available on the MCQMC wiki page.
+Currently utilizing the scrambled sobol Fortran code made available on the MCQMC wiki page.
 http://roth.cs.kuleuven.be/wiki/Public_software
+Regards to John Burkardt (FSU) for his advice on scrambling algorithms and Fortran resources. 
+
