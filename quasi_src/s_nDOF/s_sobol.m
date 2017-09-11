@@ -2,9 +2,9 @@
 %Determine how long it takes to generate points
 ti = cputime;
 %define points, skip, dimensionality of the sequence
-Nsobol = 10000000;
-Nsobol_skip = 10000000;
-d = 3;
+Nsobol = 1;
+Nsobol_skip = 1;
+d = 22;
 
 % generate the sequence and save it to a file
 points = (sobolset(d, 'Skip', Nsobol_skip));
@@ -19,4 +19,3 @@ sprintf('We had this many sobol points')
 Nsobol
 sprintf('We had this many spatial dimensions')
 d
-
