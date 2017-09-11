@@ -1,22 +1,32 @@
 # Vibrational Spectroscopy; Quasi-MC Methods
 Fortran-90 implementation of N-dimensional (N<10), k excitation (k<10) vibrational spectroscopy analysis for water clusters.
 
-The code utilizes quasi Monte Carlo methods for calculating a potential enegy difference matrix to analyze anharmonic corrections associated with the standard harmonic approximation.
-The code currently utlilizes both standard sobol and scrambled sobol sequences for evaluating high-dimensional integrals in the potential energy matrix.
-Matrix Elements Convergence and Eigenvalue Convergence available. 
+Quasi Monte Carlo methods for calculating a potential energy difference matrix to analyze anharmonic corrections associated with the standard harmonic approximation.
+Utlilizes both standard sobol and scrambled sobol quasi-random sequences for evaluating high-dimensional integrals in the potential energy matrix.
+Matrix Element Convergence and Eigenvalue Convergence as a function of point available. 
 
-## Current Developments
-Currently working on adding a potential energy surface for water, and utilizing a normal mode basis for analyizing a single water molecule.
-
+### Current Developments
+Currently adding a potential energy surface for water (TI4P and MB-POL), and utilizing a normal mode basis for analyizing a single water molecule.
 Future work will apply this methodology combined with a local monomer approximation (a single water molecule as the unit) to study water clusters. 
 
-## Author:
-Shane Flynn, Vladimir Mandelshtam. 2017. UCI
+## Author
+Shane Flynn, Vladimir A. Mandelshtam. 2017. UCI
 
-### References:
-For motivation of the method see:
+## References
+#### General Method and Application Overview
 http://aip.scitation.org/doi/abs/10.1063/1.4829836 
 
-For motivation of the basis and numerical techniques see:
+#### Numerical Method Motivation:
 http://aip.scitation.org/doi/abs/10.1063/1.4788977
 http://aip.scitation.org/doi/abs/10.1063/1.4754819
+
+#### Local Monomer Approach
+http://pubs.acs.org/doi/abs/10.1021/jp5061182
+
+#### Potential Energy Surfaces
+http://paesanigroup.ucsd.edu/index.html
+http://pubs.acs.org/doi/pdf/10.1021/ct400863t
+
+#### Quasi MC Code:
+We are currently utilizing the scrambled sobol Fortran code made available on the MCQMC wiki page.
+http://roth.cs.kuleuven.be/wiki/Public_software
