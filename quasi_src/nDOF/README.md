@@ -1,7 +1,6 @@
 # Program Main:
 Code curently takes in the number of spatial dimensions and maximum excitation to evaluate the number of permutations available to the system. 
-For each sobol point (option for non-scrambled, or 3 different scrambling algorithms):
-It then evaluates all of the hermite polynomial products and evaluates the potential energy matrix. 
+For each sobol point (standard Sobol Points only), it then evaluates all of the hermite polynomial products and evaluates the potential energy matrix. 
 Eigenvalues and matrix elements are provided as a function of iteration to track convergence. 
 
 ## Program Files
