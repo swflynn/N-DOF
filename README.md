@@ -18,6 +18,7 @@ http://aip.scitation.org/doi/abs/10.1063/1.4829836
 
 #### Numerical Methods
 http://aip.scitation.org/doi/abs/10.1063/1.4788977
+
 http://aip.scitation.org/doi/abs/10.1063/1.4754819
 
 #### Local Monomer Approximation
