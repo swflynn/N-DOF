@@ -6,11 +6,11 @@ Utlilizes both standard sobol and scrambled sobol quasi-random sequences for eva
 Matrix Element Convergence and Eigenvalue Convergence as a function of point available. 
 
 ### Current Developments
-Currently adding a potential energy surface for water (TI4P and MB-POL), and utilizing a normal mode basis for analyizing a single water molecule.
+Adding a potential energy surface for water (TIP4P and MB-POL), and utilizing a normal mode basis for analyizing a single water molecule.
 Future work will apply this methodology combined with a local monomer approximation (a single water molecule as the unit) to study water clusters. 
 
 ## Author
-Shane Flynn, Vladimir A. Mandelshtam. 2017. UCI
+Shane W. Flynn, Vladimir A. Mandelshtam. 2017. UCI
 
 ## References
 #### General Method and Application Overview
@@ -31,5 +31,5 @@ http://pubs.acs.org/doi/pdf/10.1021/ct400863t
 #### Quasi MC Code:
 Currently utilizing the scrambled sobol Fortran code made available on the MCQMC wiki page.
 http://roth.cs.kuleuven.be/wiki/Public_software
-Regards to John Burkardt (FSU) for his advice on scrambling algorithms and Fortran resources. 
 
+Regards to John Burkardt (FSU) for his advice on scrambling algorithms and Fortran resources. 
