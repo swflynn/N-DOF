@@ -1,4 +1,6 @@
 # Working Scripts
+Collection of various programs I have written during the development of the project. 
+All of these were working at the time of their development, however, the main code is the only version being maintained. 
 
 ### Hermite_Coef:
 Fortran-90 script to determine the first 10 Hermite Polynomials Coefficients 
@@ -25,3 +27,10 @@ Fortran-90 script for calculating a 1D Harmonic Oscilator matrix (weighted by a 
 The code allows users to define which degree polynomial to calculate up to for the HO Matrix elements, and uses Normally Distributed Scrambled Sobol Points for quasi-Monte Carlo integration. 
 The points must be generated externally (a matlab script has been attached for doing this) see
 https://www.mathworks.com/help/stats/qrandset.scramble.html for matlab details. 
+
+### nDOF:
+Fortran-90 script for calculating any dimensional (D<10) any excitation (k<10) Harmonic Oscillator Potential Energy matrix elements. 
+Modified hermite polynomials are used to compute the wavefunction, and quasi-monte carlo Sobol Sequences (normally distributed, Beasley-Springer-Moro) are used to perform numerical integration.
+Eigenvalue and matrix element convergance as a function of iteration are available. 
+
+
