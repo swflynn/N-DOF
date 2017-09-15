@@ -57,6 +57,10 @@ The code is used to run the `INSSOBL` and `GOSSOBL` call statements.
 This fortran program taken in a vector of sobol points (0,1) and uses the Beasley-Springer-Moro algorithm to transform them to our domain. 
 This is used for the `sobol_stdnormal` call statement. 
 
+### compile.sh:
+Bash compile script for running the code as is.
+At terminal simply use `$ bash compile.sh` to generate an executable for the script
+
 ## User Inputs:
 The user should choose values for the following:
 d, Vmax, Nsobol, and IFLAG
