@@ -1,14 +1,16 @@
 MODULE NDOF_module
 IMPLICIT NONE
-INTEGER, PARAMETER :: d = 3           
-INTEGER, PARAMETER :: Vmax = 9       
+INTEGER, PARAMETER :: d = 3          ! spatial Dimension 
+INTEGER, PARAMETER :: Vmax = 9       ! max excitation
 INTEGER :: Jmax
 INTEGER, ALLOCATABLE :: v(:,:)
 
 CONTAINS
 
+!========================================================================================!
+!=================Determine number of permutations given Vmax, d=========================!
+!========================================================================================!
 SUBROUTINE permutation(d,Vmax)
-
 Implicit none
 INTEGER :: d, Vmax
 INTEGER :: j,Vm(d),vv(d),k,v1,v2,v3,v4,v5,v6,v7,v8,v9
@@ -85,10 +87,10 @@ j=0
            endif
         enddo 
       Jmax = j
-!      WRITE(*,*) 'Jmax = ', Jmax
-!==================With Jmax, Run again to determine v(d,Jmax)===========================!
+!========================================================================================!
+!==================Populate permutation index: v(d,Jmax)=================================!
+!========================================================================================!
 ALLOCATE(v(d,Jmax))
-
 j=0
  Vm(1)=Vmax
  if(d>9) stop 'Spatial_dim>9'
@@ -187,7 +189,6 @@ j=0
         enddo
      endif
   enddo 
-!write(*,*) v   
 
 END SUBROUTINE permutation
 
@@ -195,7 +196,6 @@ END MODULE NDOF_module
 
 PROGRAM NDOF
 USE NDOF_module
-
 IMPLICIT NONE
 REAL :: initial_time, final_time
 DOUBLE PRECISION :: B
@@ -209,20 +209,24 @@ INTEGER :: TAUS, IFLAG, MAX, SAM
 LOGICAL :: FLAG(2)
 
 CALL CPU_TIME(initial_time)
-
-Nsobol = 10000000
+!==========================================================================================!
+!===============Set number of Sobol Points, IFLAG = scramble method========================!
+!============Max=30 suggested by author, Sam=1 only (no repeated calculations)=============!
+!==========================================================================================!
+Nsobol = 100
 SAM = 1
 MAX = 30
-IFLAG = 3
-
+IFLAG = 3              ! 0, 1, 2, 3 are the only options
 ALLOCATE(scrambled_z(d), herm(0:Vmax,d), A(0:Vmax,0:Vmax,d))
-
+!==========================================================================================!
+!==================================Generate v(d,Jmax)======================================!
+!==========================================================================================!
 CALL permutation(d,Vmax)
 ALLOCATE(U(Jmax,Jmax),C(Jmax,Jmax),FV1(Jmax),FV2(Jmax),eigenvalues(Jmax))         
 U=0d0
-!========================================================================================!
-! Make herm up to deg, we have redefined the Hermite Polynomials coeficients
-!========================================================================================!
+!==========================================================================================!
+!===============Each sobol point: Generate Hermite Polynomial (our normalization)==========! 
+!==========================================================================================!
 OPEN(UNIT=80, FILE='matrix.dat')
 OPEN(UNIT=81, FILE='eigenvalues.dat')
 CALL INSSOBL(FLAG,d,Nsobol,TAUS,scrambled_z,MAX,IFLAG)
@@ -235,18 +239,17 @@ DO i = 1, Nsobol
   DO j = 2,Vmax      
     herm(j,:) = (SQRT(2./j)*scrambled_z(:)*herm(j-1,:)) - (SQRT(((j-1d0)/j))*herm(j-2,:))
   END DO
-!=================================Evaluate Herm * Herm =================================!
-! Make a Matrix A that evaluates herm(deg)*herm(deg) 
-! A is a colllection of 1D calculations, contains all of the polynomial products
-!========================================================================================!
+!=========================================================================================!
+!=================Matrix A: herm(deg)*herm(deg), all polynomial products==================!
+!=========================================================================================!
   DO m=0,Vmax
     DO n=0,Vmax
       A(m,n,:) = herm(m,:)*herm(n,:)
     END DO
   END DO
-!=================================Evaluate Matrix Elements =================================!
-! Matrix U will contains the Potential Energy Matrix Elements 
-!===========================================================================================!
+!========================================================================================!
+!===============================U contains PE matrix elements============================!
+!========================================================================================!
   DO j=1,Jmax         
     DO j1=j,Jmax 
       B=A(v(1,j),v(1,j1),1)
@@ -256,28 +259,33 @@ DO i = 1, Nsobol
       U(j1,j) = U(j1,j) + B
     END DO
   END DO
-
-  if(mod(i,100000)==0) then       ! set your convergence analysis criteria
+!========================================================================================!
+!======================Partial Average, Convergence, Eigenvalues=========================!
+!========================================================================================!
+  IF(mod(i,1)==0) THEN       ! set your convergence analysis criteria
      C=U/i
-      WRITE(80,*) i, C 
-   flush(80)
-   call RS(Jmax,Jmax,C,eigenvalues,0,B,FV1,FV2,IERR) 
-   write(81,*) i, ABS(1-eigenvalues(:))
-  flush(81)
-endif
-END DO ! This closes off loop over sobol points
+     WRITE(80,*) i, C 
+     FLUSH(80)
+     call RS(Jmax,Jmax,C,eigenvalues,0,B,FV1,FV2,IERR) 
+     WRITE(81,*) i, ABS(1-eigenvalues(:))
+     FLUSH(81)
+  END IF
+END DO ! Close loop over Sobol Points
 CLOSE(UNIT=80)
 CLOSE(UNIT=81)
 
 CALL CPU_TIME(final_time)
 WRITE(*,*) 'Total Time:', final_time - initial_time
+!========================================================================================!
+!=================================Output Data File=======================================!
+!========================================================================================!
 OPEN(UNIT=83, FILE='output.dat')
-WRITE(83,*) 'Scramble method= ', IFLAG
-WRITE(83,*) 'Sobol Numbers = ', Nsobol
-WRITE(83,*) 'spacial dimensions = ', d
-WRITE(83,*) 'Maximum Excitation = ', Vmax
-WRITE(83,*) 'Jmax = ', Jmax
-WRITE(83,*) 'This calculation ran for (s): ', final_time - initial_time
+WRITE(83,*) 'Scramble method=                ', IFLAG
+WRITE(83,*) 'Sobol Points=                   ', Nsobol
+WRITE(83,*) 'Spacial Dimensions =            ', d
+WRITE(83,*) 'Maximum Excitation =            ', Vmax
+WRITE(83,*) 'Number of Permutations=         ', Jmax
+WRITE(83,*) 'This calculation ran for (s):   ', final_time - initial_time
 CLOSE(UNIT=83)
 
 END PROGRAM NDOF
