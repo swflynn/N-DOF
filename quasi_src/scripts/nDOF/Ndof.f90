@@ -2,17 +2,18 @@ MODULE NDOF_module
 IMPLICIT NONE
 INTEGER, PARAMETER :: d = 2           ! Spatial Dimension
 INTEGER, PARAMETER :: Vmax = 2        ! Maximum Excitation
-INTEGER :: Jmax
-INTEGER, ALLOCATABLE :: v(:,:)
+INTEGER :: Jmax                       ! permutations
+INTEGER, ALLOCATABLE :: v(:,:)        ! permutation index
 
 CONTAINS
 
 SUBROUTINE permutation(d,Vmax)
-
 Implicit none
 INTEGER :: d, Vmax
 INTEGER :: j,Vm(d),vv(d),k,v1,v2,v3,v4,v5,v6,v7,v8,v9
-
+!========================================================================================!
+!=================Determine number of permutations given Vmax, d=========================!
+!========================================================================================!
 j=0
        Vm(1)=Vmax
        if(d>9) stop 'Spatial_dim>9'
@@ -85,9 +86,13 @@ j=0
            endif
         enddo 
       Jmax = j
-!================With Jmax, Run again to determine v(d,Jmax)===========================!
+!      WRITE(*,*) 'Spatial Dimension = ', d 
+!      WRITE(*,*) 'max excitation = ', Vmax
+!      WRITE(*,*) 'Number of Permutations = ', Jmax
+!========================================================================================!
+!==================Populate permutation index: v(d,Jmax)=================================!
+!========================================================================================!
 ALLOCATE(v(d,Jmax))
-
 j=0
  Vm(1)=Vmax
  if(d>9) stop 'Spatial_dim>9'
@@ -186,7 +191,7 @@ j=0
         enddo
      endif
   enddo 
-
+!write(*,*) v    ! this writes out all the permutation indices
 END SUBROUTINE permutation
 
 END MODULE NDOF_module
@@ -203,77 +208,80 @@ INTEGER :: j, j1, k, m, n, IERR, Nsobol
 INTEGER*8 :: i, skip
 
 CALL CPU_TIME(initial_time)
-
-Nsobol = 1000000
-skip = 1000000 
+!=======================================================================================!
+!========================Set number of Sobol Points=====================================!
+!========================Suggest skip = Nsobol==========================================!
+!=======================================================================================!
+Nsobol = 10
+skip = 10
 ALLOCATE(scrambled_z(d), herm(0:Vmax,d), A(0:Vmax,0:Vmax,d))
-
-!========================Jmax and v(d,Jmax)=============================================!
+!=======================================================================================!
+!================================Generate v(d,Jmax)=====================================!
+!=======================================================================================!
 CALL permutation(d,Vmax)
+!WRITE(*,*) 'spacial dimensions = ', d
+!WRITE(*,*) 'Maximum Excitation = ', Vmax
+!WRITE(*,*) 'Jmax = ', Jmax                      
 ALLOCATE(U(Jmax,Jmax), U1(Jmax,Jmax), C(Jmax,Jmax), FV1(Jmax), FV2(Jmax))
-ALLOCATE(eigenvalues(Jmax))                      !Allocate our matrix elements
-U=0d0
-U1=0d0
-!========================Jmax and v(d,Jmax)=============================================!
-
-!=================================Sobol Points=================================!
+ALLOCATE(eigenvalues(Jmax))                      
+U=0d0         ! PE matrix elements
+U1=0d0        ! Partial Average
 !========================================================================================!
-! Make herm for each point up to deg we have redefined the Hermite Polynomial
-! Therefore we no longer have a coeficient (our definition or,alized them)
+!==============Each sobol point: Generate Hermite Polynomial (our normalization)=========! 
 !========================================================================================!
 OPEN(UNIT=80, FILE='matrix.dat')
 OPEN(UNIT=81, FILE='eigenvalues.dat')
 DO i = 1, Nsobol
   CALL sobol_stdnormal(d,skip,scrambled_z)
-  scrambled_z = scrambled_z/SQRT(2.)    ! factor from definition of normal distribution
-  herm(0,:) = 1.0                       ! Re-normalized hermite polynomial now
+  scrambled_z = scrambled_z/SQRT(2.)    ! Factor from definition of normal distribution
+  herm(0,:) = 1.0                       
   herm(1,:) = SQRT(2.)*scrambled_z(:)       
   DO j = 2,Vmax      
     herm(j,:) = (SQRT(2./j)*scrambled_z(:)*herm(j-1,:)) - (SQRT(((j-1d0)/j))*herm(j-2,:))
   END DO
-
-!=================================Evaluate Herm * Herm =================================!
-! Make a Matrix A that evaluates herm(deg)*herm(deg) 
-! A is a colllection of 1D calculations from before it contains all of the polynomial products
-! the only difference is that we repeat this same calculation for each spatial dimension
+!========================================================================================!
+!================Matrix A: herm(deg)*herm(deg), all polynomial products==================!
 !========================================================================================!
   DO m=0,Vmax
     DO n=0,Vmax
       A(m,n,:) = herm(m,:)*herm(n,:)
     END DO
   END DO
-
-!==============================Evaluate Matrix Elements =================================!
-! Our matrix U will contains the matrix elements U1 for partial average
 !========================================================================================!
-  DO j=1,Jmax         ! Loop over jmax
+!========================matrix U contains PE matrix elements============================!
+!========================================================================================!
+  DO j=1,Jmax         
     DO j1=j,Jmax 
       B=A(v(1,j),v(1,j1),1)
       DO k=2,d
-        B=B*A(v(k,j),v(k,j1),k)
+        B=B*A(v(k,j),v(k,j1),k)     ! spatial dimension hermite products
       END DO
       U(j1,j) = U(j1,j) + B
     END DO
   END DO
-! Write out partial average and flush
-  if(mod(i,10000)==0) then
+!========================================================================================!
+!========================Partial Average and Convergence=================================!
+!===================================Eigenvalues==========================================!
+!========================================================================================!
+  if(mod(i,1)==0) then    ! set to an appropriate increment depending on Nsobol
     U = U + U1
     U1 = 0d0
     C=U/i
-    WRITE(80,*) i, C !Writes entire matrix out
-    call RS(Jmax,Jmax,C,eigenvalues,0,B,FV1,FV2,IERR) 
-    write(81,*) i, ABS(1-eigenvalues(:))
+    WRITE(80,*) i, C      ! Each line = Nsobol U[1,1] U[1,2] ...U[Jmax,Jmax] (entire matrix)
+    call RS(Jmax,Jmax,C,eigenvalues,0,B,FV1,FV2,IERR)   ! Calculate Eigenvalues
+    write(81,*) i, ABS(1-eigenvalues(:))                ! Absolute Error Eigenvalue
     flush(80)
     flush(81)
   endif
-
-END DO ! This enddo closes off loop over sobol points
+END DO        ! End Loop Over Nsobol
 CLOSE(UNIT=80)
 CLOSE(UNIT=81)
 
 CALL CPU_TIME(final_time)
 WRITE(*,*) 'Total Time:', final_time - initial_time
-
+!========================================================================================!
+!=================================Output Data File=======================================!
+!========================================================================================!
 OPEN(UNIT=83, FILE='output.dat')
 WRITE(83,*) 'Sobol Numers = ', Nsobol
 WRITE(83,*) 'spacial dimensions = ', d

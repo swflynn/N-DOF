@@ -2,6 +2,9 @@
 Code curently takes in the number of spatial dimensions and maximum excitation to evaluate the number of permutations available to the system. 
 For each sobol point (standard Sobol Points only), it then evaluates all of the hermite polynomial products and evaluates the potential energy matrix. 
 Eigenvalues and matrix elements are provided as a function of iteration to track convergence. 
+There is no external field, therefore all integrals are of orthonormal functions.
+All diagonal elements should be 1, off-diagonal 0, and the eigenvalues should all be 1. 
+Use this test to determine the time and number of sobol points required for highly oscilatory matrix elements with higher excitation and spacial dimensions. 
 
 ## Program Files
 This current code requires the following files for compilation and execution.
@@ -11,12 +14,13 @@ Old Fortran Code used for computing and sorting the eigenvalues associated with 
 This code is only used for the `RS` call statement.
 
 ### sobol.f90
-Old Fortran code for generating scrambled and non-scrambled sobol points. 
+Old Fortran code for generating scrambled and non-scrambled sobol points (FSU John Burkardt). 
 The code is used to run the `i8_sobol` function called in the `sobol_stdnormal` subroutine.
 
 ### sobol_stdnormal.f90:
 This fortran program taken in a vector of sobol points (0,1) and uses the Beasley-Springer-Moro algorithm to transform them to our domain. 
 This is used for the `sobol_stdnormal` call statement. 
+This call statement and transformation are the same code from SCP. 
 
 ### Compile.sh
 A sample bash compile file for running the program. Simply run
@@ -52,4 +56,4 @@ This is done for evaluating our integrand as a product over the spatial dimensio
 
 ## User Inputs:
 The user should choose values for the following:
-d, Vmax, Nsobol, and skip.
+d, Vmax, Nsobol, and skip, also set your convergence output interval. 
