@@ -1,10 +1,10 @@
 # 1D_HO_matrix
 Code for evaluating the Potential Energy Matrix (QMC Sobol Sequence) for a Harmonic Oscillator Wavefunctions in a single spatial dimension.
 Code takes in what degree Hermite Polynomial you would like to calculate up to (first 10 available), and the number of Sobol Points to use for the evaluation (each sobol point is converted from a uniform distribution to a normal distribution). 
-It then calculates the matrix elements for each permutation of two wavefunctions up to deg. 
-The code represents a single basis function to be used in the n-Dimensional code (i.e. a basis is composed of a product of 2 wavefunctions and a gaussian). 
+Then calculate the PE matrix elements for each permutation of two wavefunctions up to deg. 
+This code represents a single basis function to be used in the n-Dimensional code (i.e. a basis is composed of a product of 2 wavefunctions and a gaussian), a single spatial dimension. 
 This code calculated the PE matrix for a system without an external field.
-Therefore all integrals are of orthonormal functions, off diagonal = 0, on diagonal = 1, eigenvalues = 1. 
+Therefore all integrals are orthonormal, off diagonal = 0, on diagonal = 1.
 
 ## Program Files
 This current code requires the following files for compilation and execution.
@@ -28,21 +28,11 @@ The main program.
 
 `deg`: Integer, defines the order of Hermite Polynomial to calculate up to (index starts at 1 not 0), valid for the first ten polynomials. 
 
-`scrambled_u(d)`: DP, vector containing a sobol point for each spatial dimension (uniform distribution) 
 
-`scrambled_z(d)`: DP, vector containing a unique sobol point for each spatial dimension (normal distribution).
+`norm(d, Nsobol)`: DP, vector containing normal distribution sobol point. 
 
 `coef`: DP, Coefficient to multiply Hermite Polynomial by to get Wavefunction. 
 
 `herm`: DP, evaluating each hermite polynomial recursively up to deg.
 
-`A(deg,deg)`: DP, contains all of the hermite polynomial permutation products. 
-This is done for evaluating our integrand as a product over the spatial dimensions. 
-
-`B`: DP, Evaluates product of each hermite polynomial for all the spatial dimensions. 
-
-`U(Jmax,Jmax)`: DP, Potential Energy Matrix Elements. 
-
-## User Inputs:
-The user should choose values for the following:
-Nsobol, skip (suggested to be equal to Nsobol), and deg.
+`A(deg,deg)`: DP, Potential Energy Matrix Elements for a single dimension (matrix is orthonormal, diagonal=1, off-diagonal=0). 

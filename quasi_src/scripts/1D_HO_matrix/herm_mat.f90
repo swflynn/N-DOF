@@ -2,10 +2,8 @@ PROGRAM mat_eval
   USE sobol
   IMPLICIT NONE
   
-  INTEGER :: Nsobol                           
-  INTEGER :: n, i, j, k, m, o, p         
+  INTEGER :: n, i, j, k, m, o, p, deg, Nsobol         
   INTEGER, PARAMETER :: d = 1                 ! Code for 1D case Only
-  INTEGER:: deg                             
   INTEGER*8 :: skip                          
   DOUBLE PRECISION, ALLOCATABLE:: norm(:,:)   
   DOUBLE PRECISION, DIMENSION(1:10) :: herm, coef    
