@@ -12,16 +12,20 @@ This current code requires the following files for compilation and execution.
 
 ### sobol_stdnormal.f90
 This fortran program taken in a vector of sobol points (0,1) uniformly distributed, and uses the Beasley-Springer-Moro algorithm to transform them to a normal distribution. 
+Note: This version is slightly different to account for reading in the data. 
 
 ### sobol.f90
 Old Fortran code for generating scrambled and non-scrambled sobol points (FSU John Burkardt). 
 The code is used to run the i8_sobol function called in the sobol_stdnormal subroutine.
 
+### s_sobol.m
+Matlab script for generating scrambled sobol points and generating the data file `s_sobol_unif.dat`. Define the number of points (Nsobol), the skip (suggested=Nsobol), and the spatial dimension (d).
+
 ### Compile.sh
 A sample bash compile file for running the program. Simply run
 `$ bash compile.sh` at the terminal to execute.
 
-### herm_mat.f90
+### s_sobol.f90
 The main program.
 
 #### Important Variables
@@ -29,8 +33,7 @@ The main program.
 
 `deg`: Integer, defines the order of Hermite Polynomial to calculate up to (index starts at 1 not 0), valid for the first ten polynomials. 
 
-
-`norm(d, Nsobol)`: DP, vector containing normal distribution sobol point. 
+`scrambled_z(d)`: DP, vector containing normal distribution sobol point. 
 
 `coef`: DP, Coefficient to multiply Hermite Polynomial by to get Wavefunction. 
 

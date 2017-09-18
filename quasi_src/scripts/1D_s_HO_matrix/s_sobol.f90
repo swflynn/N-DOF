@@ -7,7 +7,6 @@ PROGRAM s_mat_eval
  INTEGER :: i, j, k, m
  REAL :: initial_time, final_time
  DOUBLE PRECISION, ALLOCATABLE :: scrambled_u(:,:), scrambled_z(:), herm(:), coef(:), A(:,:)
-
 !==========================================================================================!
 !=================================Variables to set=========================================!
 !======================deg: highest polynomial, Nsobol: # iterations=======================!
