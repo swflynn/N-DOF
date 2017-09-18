@@ -11,7 +11,7 @@ This current code requires the following files for compilation and execution.
 
 ### sobol.f90
 Old Fortran code for generating scrambled and non-scrambled sobol points (FSU John Burkardt). 
-The code is used to run the `i8_sobol` function called in the `sobol_stdnormal` subroutine.
+The code is used to run the `i8_sobol` function to generate a list of sobol points.
 
 ### Compile.sh
 A sample bash compile file for running the program. Simply run
@@ -20,30 +20,23 @@ A sample bash compile file for running the program. Simply run
 ### uniform_sobol.f90
 The main program. 
 #### Important Variables:
-`d`: Integer, defines the spatial dimension, which dictates the length of the sobol point vector. 
+`m`: Integer, defines the spatial dimension for the integral.
 
-`Vmax`: Integer, sets the maximum excitation available to the system for evaluating permutations.
-Vmax must be a value between 1,9 or else `permutation` subroutine will not run. 
-
-`Jmax`: Integer containing the total number of permutations, given d and Vmax. 
-You program will contain Jmax eigenvalues and a square potential energy matrix of size Jmax.
-
-`v(d,Vmax)`: Integer, contains all of the permutation indices.
-
-`Nsobol`: Integer, number of sobol points to be generated for the entire simulation.
+`n`: Integer, number of sobol points to be generated for the entire simulation.
 This value must be less than 2**30 for the ssobol.f code to execute. 
 
 `skip`: REAL*8, starting location for the quasi-random sequence.
-Suggested to be equal to the value of Nsobol. 
+Suggested to be equal to the value of n.
 
-`scrambled_z(d)`: DP, vector containing a unique sobol point for each spatial dimension. 
+`start_val`: real, the lower bound for your integral, used for setting the function domain. 
 
-`herm(Vmax,d)`: DP evaluating each hermite polynomial recursively up to Vmax (index starts from 0). 
+`end_val`: real, the upper bound for your integral, used for setting the function domain. 
 
-`A(Vmax,Vmax,d)`: DP, contains all of the hermite polynomial permutation products. 
-This is done for evaluating our integrand as a product over the spatial dimensions. 
+`f`: real*8, the integrad evaluations accumulated for MC. 
 
-`U(Jmax,Jmax)`: DP, Potential Energy Matrix Elements. 
+`r(m,n)`: real, array containing the set of sobol numbers for integration.
+
+`q(m,n)`: real, array containing the set of sobol numbers scaled for your bounds. 
 
 ## User Inputs:
 The user should choose values for the following:
