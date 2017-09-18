@@ -37,7 +37,3 @@ Suggested to be equal to the value of n.
 `r(m,n)`: real, array containing the set of sobol numbers for integration.
 
 `q(m,n)`: real, array containing the set of sobol numbers scaled for your bounds. 
-
-## User Inputs:
-The user should choose values for the following:
-d, Vmax, Nsobol, and skip, also set your convergence output interval. 
