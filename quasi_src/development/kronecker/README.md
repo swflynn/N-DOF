@@ -1,5 +1,5 @@
 # Hamiltonian Calculation
-H = \delta_VV * \epsilon_v + Potential Difference Matrix
+H = \delta_vv * \epsilon_v + Potential Difference Matrix
 
 This code calculates the kronecker delta times the energy, both of which are a function of the v, the permutations. 
 I will refer to this matrix as `kd_mat`. 
