@@ -1,0 +1,13 @@
+ Here is the output file for your calculation
+ Natoms=                                3
+ Dim=                                   9
+ Vmax =                                 2
+ Jmax =                                55
+ potential=                  tip4p
+ Nsobol=                         10000000
+ skip=                                    10000000
+ coord_in=                   Tip4p-1.xyz                                       
+ freq_out=                   frequencies.dat                                   
+ Calculation total time (s)     1457.75549    
+
+ This was a test calculation to see if my potential matrix elements were working

@@ -1,0 +1,2 @@
+Here is a longer calculation I ran to check and see if the pe matrix elemetns are reasonable
+They seem to be somehwat okay

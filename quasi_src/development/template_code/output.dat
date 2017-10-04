@@ -1,0 +1,11 @@
+ Here is the output file for your calculation
+ Natoms=                                3
+ Dim=                                   9
+ Vmax =                                 2
+ Jmax =                                55
+ potential=                  tip4p
+ Nsobol=                               10
+ skip=                                          10
+ coord_in=                   Tip4p-1.xyz                                       
+ freq_out=                   frequencies.dat                                   
+ Calculation total time (s)     4.34199981E-02
