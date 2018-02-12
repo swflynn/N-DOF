@@ -45,6 +45,13 @@ Fortran-90 script that computes the Fundamental Frequencies for a water cluster 
 This code is a stripped-down version that also computes the fundamental frequencies using a harmonic pertebation.
 In this way you can determine directly if all transformations are appropriately defined.
 
+### nD_general_PEmat
+Generalized code using ssobol.f 
+Code only computes the PE matrix was the previous main need to make this github write-up
+
+### qMC_nm:
+Need to make this github ready. First code for monomer doing fundamental analysis. 
+
 # Open Source Code
 The following codes are/have been used during the project.
 Please see the original documentation for more details, and give proper reference to the authors. 
