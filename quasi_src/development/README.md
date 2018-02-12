@@ -1,6 +1,2 @@
 # Current Developments
-Develop code to study a real system. 
-Take equilinbrium configuration of a single water molecule. 
-Determine normal mode basis set, and perform analysis using this basis set. 
-Determine difference potential for the potential energy matrix elements.
-
+Currently need to update ssobol.f code to generate random numbers for a 64 bit machine (it is written for 32 currently) and can only generate ~10^7 points
