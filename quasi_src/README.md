@@ -1,11 +1,12 @@
 # Available Code
 
-## nDOF:
-The current version of up-to-date working code. 
+## Main:
+The latest version of verified working code.
+See development directory for progress on the project. 
 
-## scripts:
+## Scripts:
 Various programs associated with the project development that may be potentially useful to the community. 
 Each script works as is and is heavily commented for convenience. 
 
-## development:
+## Development:
 Current projects under development.
