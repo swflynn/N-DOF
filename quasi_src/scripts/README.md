@@ -40,6 +40,11 @@ Fortran-90 script that evaluates the potential energy directly from the Hessian,
 This test code is stripped down, and test to be sure all of hte normal mode transformation are being done accurately.
 Each method should produce the same result.
 
+### Harmonic:
+Fortran-90 script that computes the Fundamental Frequencies for a water cluster using the TIP4P potential only.
+This code is a stripped-down version that also computes the fundamental frequencies using a harmonic pertebation.
+In this way you can determine directly if all transformations are appropriately defined.
+
 # Open Source Code
 The following codes are/have been used during the project.
 Please see the original documentation for more details, and give proper reference to the authors. 
