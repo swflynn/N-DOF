@@ -521,6 +521,7 @@ END DO ! end loop over sobol points
 !  CLOSE(UNIT=82)
 CLOSE(UNIT=83)
 CLOSE(UNIT=84)
+CALL CPU_TIME(final_time)
 !===========================================================================================!
 !=================================Simulation Output=========================================! 
 !===========================================================================================!
@@ -541,7 +542,6 @@ CLOSE(UNIT=84)
  WRITE(90,*) 'Calculation total time (s)  ', final_time - initial_time
  WRITE(90,*) 'Fundamental Frequency Calculation!'
  CLOSE(90)
-CALL CPU_TIME(final_time)
 WRITE(*,*) 'Final Check Successful; Hello Universe!'
 WRITE(*,*) 'TOTAL TIME: ', final_time - initial_time
 END PROGRAM main

@@ -2,7 +2,9 @@
 Code for analyzing a single water monomer (TIP4P PES).
 This code uses a normal mode analysis to make the  Hamiltonian Seperable.
 It then calculates the Potential Energy Difference matrix and computes the Fundamental Frequencies for the water monomer. 
-This calculations is the whole shabang! Our First full system calculation. 
+This calculations is the whole sha-bang! Our First full system calculation. 
+
+The code can output the potential energy difference matrix, the associated eigenvalues and eigenvectors, and the fundamentla frequencies.
 
 # Associated Files
 
