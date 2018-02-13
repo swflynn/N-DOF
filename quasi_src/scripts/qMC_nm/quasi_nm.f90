@@ -1,13 +1,13 @@
-! 10/11/17
-! Code for single water molecule analysis with difference potential
-! 11/21/17 Replace frequency cutoff with frequency replace variable too
+! 11/21/17
+! Code for single water molecule analysis with difference potential, computes fundamental frequencies
+! 2-12-18 clean up code for github
+! Only for TIP4P potential to simplify for testing
 
 Module quasi_nm
 IMPLICIT NONE 
 !============================================================================================!
 !======================================Global paramaters=====================================!
 !============================================================================================!
-  DOUBLE PRECISION, PARAMETER:: deg=180/dacos(-1d0)
   DOUBLE PRECISION, PARAMETER:: pi=dacos(-1d0)
   DOUBLE PRECISION, PARAMETER:: bohr = 0.52917721092
   DOUBLE PRECISION, PARAMETER:: autocm = 2.194746313D5
@@ -15,12 +15,12 @@ IMPLICIT NONE
   DOUBLE PRECISION, PARAMETER:: melectron=1822.88839
   DOUBLE PRECISION, PARAMETER:: Hmass = 1.00782503223*melectron
   DOUBLE PRECISION, PARAMETER:: Omass = 15.99491461957*melectron
-  DOUBLE PRECISION, ALLOCATABLE:: sqrt_mass(:),mass(:)
-  CHARACTER(LEN=2), ALLOCATABLE:: atom_type(:)
-  CHARACTER(LEN=5) potential
 !============================================================================================!
 !=======================================Global Variables=====================================!
 !============================================================================================!
+  DOUBLE PRECISION, ALLOCATABLE:: sqrt_mass(:),mass(:)
+  CHARACTER(LEN=2), ALLOCATABLE:: atom_type(:)
+  CHARACTER(LEN=5) potential
   INTEGER:: Dim, Natoms, Jmax, Vtot, data_freq
   INTEGER, ALLOCATABLE :: v(:,:)
   INTEGER, PARAMETER :: Vmax(9) = (/0,0,0,6,6,6,6,6,6/)
@@ -89,7 +89,7 @@ CONTAINS
     do i=1,Dim
        do j=1,i
           if(i.ne.j) H(i,j)=(H(i,j)+H(j,i))/2
-          H(i,j)=H(i,j)/(sqrt_mass(i)*sqrt_mass(j)) ! mass-scaled Hessian    \tilde{K} in atomic units
+          H(i,j)=H(i,j)/(sqrt_mass(i)*sqrt_mass(j)) ! mass-scaled Hessian
           if(i.ne.j)  H(j,i)=H(i,j)
        enddo
     enddo
@@ -108,11 +108,7 @@ CONTAINS
     
     if(potential=='tip4p') then
        call TIP4P(NO, q, energy, force)
-    else if(potential=='mbpol') then
-       call calcpotg(NO, energy, q*bohr, force)
-       force = -force*bohr/autokcalmol
-       energy = energy/autokcalmol
-    else
+   else
        stop 'cannot identify the potential'
     endif
   end subroutine water_potential
@@ -184,7 +180,7 @@ SUBROUTINE permutation()
        endif
     enddo
     Jmax = j
-!===================================With Jmax, Run again=================================!
+!====================================With Jmax, Run again====================================!
     WRITE(*,*) 'Jmax = ', Jmax
     ALLOCATE(v(DIM,Jmax))
     
@@ -263,38 +259,31 @@ SUBROUTINE permutation()
 END SUBROUTINE permutation
 
 END MODULE quasi_nm
-!===========================================================================================!
-!===========================================================================================!
-!===========================================================================================!
+!============================================================================================!
+!============================================================================================!
+!============================================================================================!
 PROGRAM main
   USE quasi_nm
   
   IMPLICIT NONE
-  real :: initial_time, final_time  
-  integer(kind=8) :: skip
-  integer :: Nsobol, i,j, i1, j2(1), jj, jj1
-  double precision, allocatable :: omega(:), Hess(:,:), U(:,:), q(:), q0(:)
-  double precision, allocatable :: q1(:), force(:)
-  double precision :: freq_cutoff, freq_replace, E,  V0, potdif,harm_pot
-  character(len=50) coord_in
-!===========================================================================================!
-!====================================Variables My Code======================================! 
-! There is a U defined in the Get_Hessian function U(dim,dim)
-! I will define my code U => Umat, contains the PE matrix elements Umat(Jmax,Jmax)
-! Replace scrambled_z with y for normal mode points. 
-!===========================================================================================!
+  REAL :: initial_time, final_time  
+  INTEGER(KIND=8) :: skip
+  INTEGER :: Nsobol, i,j, i1, j2(1), jj, jj1, m, n, IERR, j1, k
+  DOUBLE PRECISION :: freq_cutoff, freq_replace, E,  V0, potdif,harm_pot
+  DOUBLE PRECISION :: B, E0(1), E1(1), E2(1), E3(1)
+  DOUBLE PRECISION, ALLOCATABLE :: omega(:), Hess(:,:), U(:,:), q(:), q0(:), q1(:), force(:)
   DOUBLE PRECISION, ALLOCATABLE :: y(:), herm(:,:), A(:,:,:), Umat(:,:), U1mat(:,:)
   DOUBLE PRECISION, ALLOCATABLE :: C(:,:), FV1(:), FV2(:), eigenvalue(:), eigenvec(:,:)
-  INTEGER:: m, n, IERR, j1, k
-  DOUBLE PRECISION :: B, E0(1), E1(1), E2(1), E3(1)
-!==========================================================================================!
-!===============================Variables to run ssobol.f==================================!
-!==========================================================================================!
+  CHARACTER(LEN=50) :: coord_in
+  LOGICAL :: readhessian
+!============================================================================================!
+!===============================Variables to run ssobol.f====================================!
+!============================================================================================!
 INTEGER :: TAUS, IFLAG, max_seq, SAM
-LOGICAL :: FLAG(2),readhessian
-!===========================================================================================!
-!====================================Read Input File========================================! 
-!===========================================================================================! 
+LOGICAL :: FLAG(2)
+!============================================================================================!
+!=====================================Read Input File========================================!
+!============================================================================================!
   CALL CPU_TIME(initial_time)
   OPEN(60,FILE='input.dat')
   READ(60,*) Vtot
@@ -309,99 +298,78 @@ LOGICAL :: FLAG(2),readhessian
   freq_cutoff = freq_cutoff / autocm
   freq_replace = freq_replace / autocm
 WRITE(*,*) 'Test 1; Successfully Read Input File!'
-!==========================================================================================!
-!===============================Variables to run ssobol.f==================================!
-!==========================================================================================!
+!============================================================================================!
+!=================================Variables to run ssobol.f==================================!
+!============================================================================================!
   SAM = 1
   max_seq = 30
   IFLAG = 1
-!===========================================================================================!
-!======================================Read xyz File========================================! 
-!===========================================================================================!
-  OPEN(61,File=coord_in)
+!============================================================================================!
+!===================================Read Geometry xyz========================================!
+!============================================================================================!
+  OPEN(61, File=coord_in)
   READ(61,*) Natoms
   READ(61,*)
-  Dim= 3*Natoms ! cartesian coordinates
+  Dim = 3*Natoms ! cartesian coordinates
 WRITE(*,*) 'Test 2; Successfully Read in Coordinates!'
-!===========================================================================================!
-!======================================(vlad allocations)===================================!
-!===========================================================================================! 
+!============================================================================================!
   ALLOCATE(omega(Dim), atom_type(Natoms), sqrt_mass(Dim), mass(Natoms), &
        q(Dim), q0(Dim), force(Dim), Hess(Dim,Dim), U(Dim,Dim))
-!===========================================================================================!
-!============================Read Atom Type, get mass=======================================! 
-!======================q0 contains x,y,z coordinates of equ config==========================!
-!===========================================================================================!
+!============================================================================================!
+!=============================Read Atom Type, get mass=======================================!
+!=======================q0 contains x,y,z coordinates of equ config==========================!
+!============================================================================================!
   DO i=1,Natoms
      READ(61,*) atom_type(i), q0(3*i-2:3*i)   ! coordinates in Angstroms
      mass(i)=Atom_mass(atom_type(i))
      sqrt_mass(3*i-2:3*i)=SQRT(mass(i))
   END DO
  q0=q0/bohr            ! convert coordinates to atomic units
-write(*,*) 'q0'
-write(*,*) q0
 WRITE(*,*) 'Test 3; Successfully Converted Coordinates to Atomic Units'
-!===========================================================================================!
-!=========================Let user see what they defined====================================! 
-!===========================================================================================!
-  WRITE(*,*) 'Natoms=              ',Natoms
-  WRITE(*,*) 'Dim=                 ',Dim
-  WRITE(*,*) 'potential=           ',potential
-  WRITE(*,*) 'Maximum Excitation=  ',Vtot
-  WRITE(*,*) 'frequency cutoff=    ',freq_cutoff*autocm
-  WRITE(*,*) 'frequency replace=    ',freq_replace*autocm
-  WRITE(*,*) 'Nsobol=              ',Nsobol
-  WRITE(*,*) 'skip=                ',skip
-  WRITE(*,*) 'molecule:            ', atom_type
-  WRITE(*,*) 'Test 4; Successfully Define Parameters for Calculation'
-!===========================================================================================!
-!====================================Equ Config=============================================! 
-!===========================================================================================!
+!============================================================================================!
+!============================Equilibrium Configuration=======================================!
+!============================================================================================!
   CALL water_potential(Natoms/3, q0, E, force)
   WRITE(*,*) 'E0 =',E*autocm, 'cm-1'
 WRITE(*,*) 'Test 5; Successfully Evaluate Potential Zero-Point'
-!===========================================================================================!
-!====================================Hessian Frequencies====================================! 
-!===========================================================================================!
-if(readhessian) then
-   read(61,*)  ((Hess(i,j),i=1,j),j=1,Dim) ! mass-scaled Hessian in atomic units
-   do j=1,Dim
-      do i=1,j-1
+!============================================================================================!
+!====================================Hessian Frequencies=====================================!
+!============================================================================================!
+! Allow user to read in hessian values from a different simulation
+IF(readhessian) THEN 
+   READ(61,*)  ((Hess(i,j),i=1,j),j=1,Dim) ! mass-scaled Hessian in atomic units
+   DO j=1,Dim
+      DO i=1,j-1
          Hess(j,i)=Hess(i,j)
-      enddo
-   enddo
-else
+      END DO
+   END DO 
+! Or compute the Hessian from the provided configuration
+ELSE
    CALL Get_Hessian(q0,Hess)
-endif
-close(61)
+END IF
+CLOSE(61)
 CALL frequencies_from_Hess(Dim,Hess,omega,U)
 
 WRITE(*,*) 'Test 6; Successfully Compute Hessian and Frequencies'
-!===========================================================================================!
-!==================================Normal Modes U(dim,dim)==================================! 
-!==============================sqrt(.5) comes from std normal dist==========================!
-!===========================================================================================!
+!============================================================================================!
+!===================================Normal Modes U(dim,dim)==================================!
+!===============================sqrt(.5) comes from std normal dist==========================!
+!============================================================================================!
 Hess=0d0
 DO k=1,Dim
    IF (omega(k)<freq_cutoff) THEN
       omega(k) = freq_replace
    END IF
-
 ! Compute Hessian 
-   do i=1,Dim
-      do j=1,Dim
+   DO i=1,Dim
+      DO j=1,Dim
          Hess(i,j)=Hess(i,j)+ omega(k)**2*U(i,k)*U(j,k)
-      enddo
-   enddo
+      END DO 
+   END DO 
    DO i = 1, Dim
-      U(i,k) = SQRT(1/omega(k)) / sqrt_mass(i)*U(i,k)   !VM corrected, 1/2 factor
+      U(i,k) = SQRT(1/omega(k)) / sqrt_mass(i)*U(i,k)
    END DO
-!   write(*,*) 'omega(k)', omega(k)
-!   write(*,*) 'U: ', U(:,k)              ! U are the normal modes
 END DO ! loop over eigenvalues
-
-!WRITE(*,*) 'Here are the normal modes'
-!WRITE(*,*) U
 WRITE(*,*) 'Test 7; Successfully Compute Normal Modes'
 !===========================================================================================!
 !============================Determine Jmax and Permutations================================!
@@ -413,66 +381,53 @@ WRITE(*,*) 'Test 7; Successfully Compute Normal Modes'
 
   Umat=0d0  ! initialize PE matrix
   U1mat=0d0 
-  OPEN(UNIT=80, FILE='matrix.dat')
-!  OPEN(UNIT=81, FILE='eigenvalues.dat')
-!  OPEN(UNIT=82, FILE='eigenvectors.dat')
+!  OPEN(UNIT=80, FILE='matrix.dat') ! Can Write Out Pootential Energy Difference
+!  OPEN(UNIT=81, FILE='eigenvalues.dat') ! Can write eigenvalues to file
+!  OPEN(UNIT=82, FILE='eigenvectors.dat') ! Can write eigenvectors to file
   OPEN(UNIT=83, FILE='fundamentals.dat')
-  OPEN(UNIT=84, FILE='weight.dat')
+  OPEN(UNIT=84, FILE='weight.dat') ! Can write out vector weight 
 WRITE(*,*) 'Test 8; Successfully Allocate Arrays '
-!===========================================================================================!
-!================================Loop over Sobol Points=====================================!
-!===============================Normalize with Gaussian=====================================!
-!=============Calculate (our normalization) Hermite's, up to Vtot, ini poly=0 ==============!
-!===========================================================================================!
+!============================================================================================!
+!=================================Loop over Sobol Points=====================================!
+!================================Normalize with Gaussian=====================================!
+!==================Calculate (our normalization) Hermite's, up to Vtot=======================!
+!================Polynomial index starts at 0 to be consistent with books====================!
+!============================================================================================!
   CALL INSSOBL(FLAG,dim,Nsobol,TAUS,y,max_seq,IFLAG)
-WRITE(*,*) 'Test 9; Successfully Define Sobol Scrambling Method'
   DO i = 1, Nsobol
      CALL GOSSOBL(y)
      CALL sobol_stdnormal(dim, y)
-     y = y/SQRT(2.)    ! factor from definition of normal distribution
-     herm(0,:) = 1.0                       ! Re-normalized hermite polynomial now
+     y = y/SQRT(2.)    ! factor from normal distribution
+     herm(0,:) = 1.0                       ! Re-normalized hermite polynomials
      herm(1,:) = SQRT(2.)*y(:)       
      DO j = 2,Vtot      
         herm(j,:) = (SQRT(2./j)*y(:)*herm(j-1,:)) - (SQRT(((j-1d0)/j))*herm(j-2,:))
      END DO
-!     write(*,*) 'here is herm'
-!     write(*,*) herm
-!write(*,*) 'Test 10 Check at sobol point: ', i !testing remove after
-!===========================================================================================!
-!===================================Evaluate Herm * Herm ===================================!
-!==========================Matrix A: herm(deg)*herm(deg), deg(0,Vtot)=======================!
-!===========================================================================================!
+!============================================================================================!
+!===================================Evaluate Herm * Herm ====================================!
+!==========================Matrix A: herm(deg)*herm(deg), deg(0,Vtot)========================!
+!============================================================================================!
      DO m=0,Vtot
         DO n=0,Vtot
            A(m,n,:) = herm(m,:)*herm(n,:)
         END DO
      END DO
-!write(*,*) 'This is A: the hermitie polynomial products'   !testing remove when done
-!write(*,*) A           ! Testing, remove when done
-!write(*,*) 'Test 11; Successfully Compute Polynomial Products'    ! testing remove when done
-!===========================================================================================!
-!==========================Difference Potential=============================================!
-!===========================================================================================!
-!write(*,*) 'here is q', q
+!============================================================================================!
+!=========================Use Coordinates to Compute Water Potential=========================!
+!===========Subtract off harmonic approximation to compute the potential difference==========!
+!============================================================================================!
      q1=q0
      DO j =1,Dim
         q1(:) = q1(:) + y(j)*U(:,j)
      END DO
-!write(*,*) 'here is q1', q1              ! testing remove when done
-
     CALL water_potential(Natoms/3, q1, potdif, force)
-    !write(*,*) 'Here is the potential', potdif
       DO j=1,Dim
           potdif = potdif -  (0.5*omega(j)*y(j)**2)
       END DO
-
-!write(*,*) 'Here is the potential difference'           !testing remove when done
-!write(*,*) potdif                                  ! testing remove when done
-!write(*,*) 'Test 12; Succesfully Compute Potential Difference'     ! testing remove when done
-!===========================================================================================!
-!================================Evaluate Matrix Elements ==================================!
-!===============Matrix Umat: PE matrix elements. U1mat for partial average==================!
-!===========================================================================================!
+!============================================================================================!
+!==================================Evaluate Matrix Elements==================================!
+!=====================Umat: PE Difference Matrix. U1mat for partial average==================!
+!============================================================================================!
      DO j=1,Jmax         
         DO j1=j,Jmax 
            B=potdif
@@ -482,18 +437,17 @@ WRITE(*,*) 'Test 9; Successfully Define Sobol Scrambling Method'
            U1mat(j1,j) = U1mat(j1,j) + B
         END DO
      END DO
-!write(*,*) 'Test 13; Successfully Compute PE Difference Matrix'    ! testing remove when done
-!===========================================================================================!
-!===================================Partial Average and Flush===============================!
-!===========================================================================================!
+!============================================================================================!
+!==================================Partial Average and Flush=================================!
+!============================================================================================!
      IF(MOD(i,data_freq)==0) THEN
         Umat = Umat + U1mat
         U1mat = 0d0
         C=Umat/i
-      write(*,*) 'iteration: ', i
-!===========================================================================================!
-!===============================Symmetrize Matrix For Eigenvalues===========================!
-!===========================================================================================!
+      WRITE(*,*) 'iteration: ', i
+!============================================================================================!
+!===============================Symmetrize Matrix For Eigenvalues============================!
+!============================================================================================!
         DO j=1,Jmax-1  
            DO j1=j+1,Jmax 
               C(j,j1) = C(j1,j) 
@@ -504,81 +458,71 @@ WRITE(*,*) 'Test 9; Successfully Define Sobol Scrambling Method'
             DO k=1,DIM
               C(j,j)=C(j,j)+omega(k)*(v(k,j)+0.5) 
             END DO 
-        END DO 
-
-        WRITE(80,*) i
-        do jj = 1,Jmax
-            write(80,*) C(:,jj)*autocm !Writes matrix column wise
-        end do
+        END DO
+! Can write out potential difference matrix elements
+!        WRITE(80,*) i
+!        DO jj = 1,Jmax
+!            WRITE(80,*) C(:,jj)*autocm
+!        END DO 
         CALL RS(Jmax,Jmax,C,eigenvalue,1,eigenvec,FV1,FV2,IERR)
-!        WRITE(81,*) i, eigenvalue(:)           ! Gives the eigenvalues to file
-!        WRITE(82,*) i, eigenvec(:,:)             !  gives the eigenvectors
+!        WRITE(81,*) i, eigenvalue(:)           ! Write eigenvalues to file
+!        WRITE(82,*) i, eigenvec(:,:)           ! Write eigenvectors to file
 !===========================================================================================!
-!===============================Analyze ground and Fundamental Freq=========================!
+!=====================Analyze Ground State and Fundamental Frequencies======================!
 !===========================================================================================!
   E0 = 0d0
   E1 = 0d0
   E2 = 0d0
   E3 = 0d0
-do i1 = 1,Jmax
-  if(all(v(:,i1)==(/0,0,0,0,0,0,0,0,0/))) then
-      j2=maxloc(abs(eigenvec(i1,:)))
-      E0 = eigenvalue(j2)*autocm
-      write(*,*) 'j2, index =: ', j2
-      write(*,*) 'E0=',E0,'  state=',v(7:9,i1), ' i1 index=', &
-      i1,'  weight=', eigenvec(i1,j2)**2
-     write(*,*) i, v(7:9,i1), E0, eigenvec(i1,j2)**2
-     write(84,*) i, v(7:9,i1), E0, eigenvec(i1,j2)**2
-
- else if(all(v(:,i1)==(/0,0,0,0,0,0,1,0,0/))) then
-      j2=maxloc(abs(eigenvec(i1,:)))
-      E1 = eigenvalue(j2)*autocm
-      write(*,*) 'j2, index =: ', j2
-      write(*,*) 'E1=', E1,'  state=',v(7:9,i1), ' i1 index=', &
-      i1,'  weight=', eigenvec(i1,j2)**2
-     write(*,*) i, v(7:9,i1), E1, eigenvec(i1,j2)**2
-     write(84,*) i, v(7:9,i1), E1, eigenvec(i1,j2)**2
-
- else if(all(v(:,i1)==(/0,0,0,0,0,0,0,1,0/))) then
-      j2=maxloc(abs(eigenvec(i1,:)))
-      E2 = eigenvalue(j2)*autocm
-      write(*,*) 'j2, index =: ', j2
-      write(*,*) 'E2=', E2,'  state=',v(7:9,i1), ' i1 index=', &
-      i1,'  weight=', eigenvec(i1,j2)**2
-     write(*,*) i, v(7:9,i1), E2, eigenvec(i1,j2)**2
-     write(84,*) i, v(7:9,i1), E2, eigenvec(i1,j2)**2
-
- else if(all(v(:,i1)==(/0,0,0,0,0,0,0,0,1/))) then
-      j2=maxloc(abs(eigenvec(i1,:)))
-      E3 = eigenvalue(j2)*autocm
-      write(*,*) 'j2, index =: ', j2
-      write(*,*) 'E3=', E3,'  state=',v(7:9,i1), ' i1 index=', &
-      i1,'  weight=', eigenvec(i1,j2)**2
-     write(*,*) i, v(7:9,i1), E3, eigenvec(i1,j2)**2
-     write(84,*) i, v(7:9,i1), E3, eigenvec(i1,j2)**2
- endif
-
-end do
- write(83,*) i,E0, E1 - E0, E2-E0, E3-E0
-
-        FLUSH(80)
-!        FLUSH(81)
-!        FLUSH(82)
-        FLUSH(83)
+        DO i1 = 1,Jmax
+          IF(all(v(:,i1)==(/0,0,0,0,0,0,0,0,0/))) THEN
+              j2=maxloc(abs(eigenvec(i1,:)))
+              E0 = eigenvalue(j2)*autocm
+              WRITE(*,*) 'j2, index =: ', j2
+              WRITE(*,*) 'E0=',E0,'  state=',v(7:9,i1), ' i1 index=', &
+              i1,'  weight=', eigenvec(i1,j2)**2
+              WRITE(*,*) i, v(7:9,i1), E0, eigenvec(i1,j2)**2
+              WRITE(84,*) i, v(7:9,i1), E0, eigenvec(i1,j2)**2
+          ELSE IF(all(v(:,i1)==(/0,0,0,0,0,0,1,0,0/))) THEN
+              j2=maxloc(abs(eigenvec(i1,:)))
+              E1 = eigenvalue(j2)*autocm
+              WRITE(*,*) 'j2, index =: ', j2
+              WRITE(*,*) 'E1=', E1,'  state=',v(7:9,i1), ' i1 index=', &
+              i1,'  weight=', eigenvec(i1,j2)**2
+              WRITE(*,*) i, v(7:9,i1), E1, eigenvec(i1,j2)**2
+              WRITE(84,*) i, v(7:9,i1), E1, eigenvec(i1,j2)**2
+          ELSE IF(all(v(:,i1)==(/0,0,0,0,0,0,0,1,0/))) THEN
+              j2=maxloc(abs(eigenvec(i1,:)))
+              E2 = eigenvalue(j2)*autocm
+              WRITE(*,*) 'j2, index =: ', j2
+              WRITE(*,*) 'E2=', E2,'  state=',v(7:9,i1), ' i1 index=', &
+              i1,'  weight=', eigenvec(i1,j2)**2
+              WRITE(*,*) i, v(7:9,i1), E2, eigenvec(i1,j2)**2
+              WRITE(84,*) i, v(7:9,i1), E2, eigenvec(i1,j2)**2
+          ELSE IF(all(v(:,i1)==(/0,0,0,0,0,0,0,0,1/))) THEN
+              j2=maxloc(abs(eigenvec(i1,:)))
+              E3 = eigenvalue(j2)*autocm
+              WRITE(*,*) 'j2, index =: ', j2
+              WRITE(*,*) 'E3=', E3,'  state=',v(7:9,i1), ' i1 index=', &
+              i1,'  weight=', eigenvec(i1,j2)**2
+              WRITE(*,*) i, v(7:9,i1), E3, eigenvec(i1,j2)**2
+              WRITE(84,*) i, v(7:9,i1), E3, eigenvec(i1,j2)**2
+          END IF
+        END DO
+        WRITE(83,*) i,E0, E1 - E0, E2-E0, E3-E0
+        !        FLUSH(80)
+        !        FLUSH(81)
+        !        FLUSH(82)
+                FLUSH(83)
       END IF
-
-  END DO ! end loop over sobol points
-  CLOSE(UNIT=80)
+END DO ! end loop over sobol points
+!  CLOSE(UNIT=80)
 !  CLOSE(UNIT=81)
 !  CLOSE(UNIT=82)
-  CLOSE(UNIT=83)
-  CLOSE(UNIT=84)
-
-CALL CPU_TIME(final_time)
-WRITE(*,*) 'Final Check Successful; Hello Universe!'
-WRITE(*,*) 'TOTAL TIME: ', final_time - initial_time
+CLOSE(UNIT=83)
+CLOSE(UNIT=84)
 !===========================================================================================!
-!========================================output.dat=========================================! 
+!=================================Simulation Output=========================================! 
 !===========================================================================================!
  OPEN(90,FILE='simulation.dat')
  WRITE(90,*) 'Here is the output file for your calculation'
@@ -597,5 +541,7 @@ WRITE(*,*) 'TOTAL TIME: ', final_time - initial_time
  WRITE(90,*) 'Calculation total time (s)  ', final_time - initial_time
  WRITE(90,*) 'Fundamental Frequency Calculation!'
  CLOSE(90)
-
+CALL CPU_TIME(final_time)
+WRITE(*,*) 'Final Check Successful; Hello Universe!'
+WRITE(*,*) 'TOTAL TIME: ', final_time - initial_time
 END PROGRAM main
