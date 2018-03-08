@@ -11,50 +11,11 @@ See the development directory for an implementation computing all of the monomer
 ## Files:
 The following files are necessary for running the program. 
 
-### quasi_mc.f90:
-The main program. 
-#### Important Variables:
-`d`: Integer, defines the spatial dimension, which dictates the length of the sobol point vector. 
-
-`Vmax`: Integer, sets the maximum excitation available to the system for evaluating permutations.
-Vmax must be a value between 1,9 or else `permutation` subroutine will not run. 
-
-`Jmax`: Integer containing the total number of permutations, given d and Vmax. 
-You program will contain Jmax eigenvalues and a square potential energy matrix of size Jmax.
-
-`v(d,Vmax)`: Integer, contains all of the permutation indices.
-
-`Nsobol`: Integer, number of sobol points to be generated for the entire simulation.
-This value must be less than 2**30 for the ssobol.f code to execute. 
-
-`SAM`: Integer, sets the number of times to perform the scrambled point generation.
-This value will repeat your entire calculation, therefore a value of 1 should be used. 
-See ssobol.f for details. 
-
-`MAX`: Integer, defining the maximum nmber of digits used for Owen Scrambling. 
-Template file suggested setting MAX = 30, see ssobol.f for documentation.
-
-`IFLAG`: Integer, defines the method of scrambling used for generating the Sobol Points. 
-Options are 0,1,2,3. 0 = no scrambling, 1 = Owen , 2 = Faure-Tezuka , 3 = Owen + Faure-Tezuka.
-From my experience 1, and 3 are the best options for reducing higher-dimensional correlations for numerical integration. 
-
-`scrambled_z(d)`: DP, vector containing a unique sobol point for each spatial dimension. 
-
-`herm(Vmax,d)`: DP evaluating each hermite polynomial recursively up to Vmax (index starts from 0). 
-
-`A(Vmax,Vmax,d)`: DP, contains all of the hermite polynomial permutation products. 
-This is done for evaluating our integrand as a product over the spatial dimensions. 
-
-`U(Jmax,Jmax)`: DP, Potential Energy Matrix Elements. 
-
-### ssobol.f:
-Old Fortran code for generating scrambled and non-scrambled sobol points. 
-The code is used to run the `INSSOBL` and `GOSSOBL` call statements. 
+### Makefile
+A simple makefile for compiling the program.
+This makefile requires both the TIP4P.f90 PES module, and the MBPOL PES module. 
+The ssobol.f Fortran code is required for generating the sobol sequences. 
+The code is compiled using OMP for parallel implementation. 
 
 ### sobol_stdnormal.f90:
-This fortran program taken in a vector of sobol points (0,1) and uses the Beasley-Springer-Moro algorithm to transform them to our domain. 
-This is used for the `sobol_stdnormal` call statement. 
-
-### compile.sh:
-Bash compile script for running the code as is.
-At terminal simply use `$ bash compile.sh` to generate an executable for the script
+This fortran program taken in a vector of sobol points (0,1) and uses the Beasley-Springer-Moro algorithm to transform it to a Gaussian Distribution for numerical integration. . 
