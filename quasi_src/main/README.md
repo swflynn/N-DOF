@@ -1,14 +1,15 @@
 # Program Main:
 qMC numerical integration of a single water monomer within a water cluster. 
 
+The user defines the number of Basis Functions to describe the monomer with (less than 10) and the highest excitation available to any indivdual basis, and the total excitation for the system. 
+The program then computes the Hessian and eigenvectors for the water cluser input geometry. 
+A normal mode transformation is then computed and the Potential Difference Matrix (PES - HA) is constructed.
+This matrix is then diagonalized (using the LAPACK library) and the fundamental frequencies for the first water within the cluser are computed.
 
-The code curently takes in the number of spatial dimensions and maximum excitation to evaluate the number of permutations available to the system. 
-For each sobol point (option for non-scrambled, or 3 different scrambling algorithms):
-It then evaluates all of the hermite polynomial products and evaluates the potential energy matrix. 
-Eigenvalues and matrix elements are provided as a function of iteration to track convergence. 
+See the development directory for an implementation computing all of the monomers fundamental frequencies. 
 
-## Program Files:
-This current code requires the following files for compilation and execution.
+## Files:
+The following files are necessary for running the program. 
 
 ### quasi_mc.f90:
 The main program. 
@@ -46,10 +47,6 @@ This is done for evaluating our integrand as a product over the spatial dimensio
 
 `U(Jmax,Jmax)`: DP, Potential Energy Matrix Elements. 
 
-### cg.f:
-Old Fortran Code used for computing and sorting the eigenvalues associated with out potential energy matrix. 
-This code is only used for the `RS` call statement.
-
 ### ssobol.f:
 Old Fortran code for generating scrambled and non-scrambled sobol points. 
 The code is used to run the `INSSOBL` and `GOSSOBL` call statements. 
@@ -61,7 +58,3 @@ This is used for the `sobol_stdnormal` call statement.
 ### compile.sh:
 Bash compile script for running the code as is.
 At terminal simply use `$ bash compile.sh` to generate an executable for the script
-
-## User Inputs:
-The user should choose values for the following:
-d, Vmax, Nsobol, and IFLAG
