@@ -1,5 +1,6 @@
 # Program Main:
-The current version of the working code. 
+qMC numerical integration of a single water monomer within a water cluster. 
+
 
 The code curently takes in the number of spatial dimensions and maximum excitation to evaluate the number of permutations available to the system. 
 For each sobol point (option for non-scrambled, or 3 different scrambling algorithms):
