@@ -18,4 +18,7 @@ The ssobol.f Fortran code is required for generating the sobol sequences.
 The code is compiled using OMP for parallel implementation. 
 
 ### sobol_stdnormal.f90:
-This fortran program taken in a vector of sobol points (0,1) and uses the Beasley-Springer-Moro algorithm to transform it to a Gaussian Distribution for numerical integration. . 
+This fortran program taken in a vector of sobol points (0,1) and uses the Beasley-Springer-Moro algorithm to transform it to a Gaussian Distribution for numerical integration. 
+
+## run_code
+This directory contains an example input file and input geometry for running a simulation.
