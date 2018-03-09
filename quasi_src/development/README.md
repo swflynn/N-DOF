@@ -1,2 +1,6 @@
 # Current Developments
-Currently need to update ssobol.f code to generate random numbers for a 64 bit machine (it is written for 32 currently) and can only generate ~10^7 points
+The current version of the code computes fundamental frequencies for a single water molecule within a water cluster.
+We need to analyze every monomer within the cluster, and would like to run each analysis indepedently. 
+Currently writing a bash script to interchange the molecules within the input xyz file and execute each calculation. 
+
+Also will need to automate the data analysis portion of the project. 
