@@ -8,6 +8,9 @@ Therefore all integrals are orthonormal, off diagonal = 0, on diagonal = 1.
 
 ## Associated Files
 
+### herm_mat.f90
+The program main
+
 ### sobol_stdnormal.f90
 This fortran program taken in a vector of sobol points (0,1) uniformly distributed, and uses the Beasley-Springer-Moro algorithm to transform them to a normal distribution. 
 
@@ -18,7 +21,3 @@ The code is used to run the i8_sobol function called in the sobol_stdnormal subr
 ### Compile.sh
 A sample bash compile file for running the program. Simply run
 `$ bash compile.sh` at the terminal to execute.
-
-### herm_mat.f90
-The main program.
-
