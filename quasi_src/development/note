@@ -1,0 +1,4 @@
+User needs to supply a file called input.dat and name.xyz 
+This script will determine the number of water molecules within the name.xyz file.
+It wil then generte a directory for each monomer, and in each directory place the specified monomer at the beginning of the xyz file.
+It then generates a new input file with the appropiate monomer xyz file name
