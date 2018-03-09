@@ -6,14 +6,13 @@ This code represents a single basis function to be used in the n-Dimensional cod
 This code calculated the PE matrix for a system without an external field.
 Therefore all integrals are orthonormal, off diagonal = 0, on diagonal = 1.
 
-## Program Files
-This current code requires the following files for compilation and execution.
+## Associated Files
 
 ### sobol_stdnormal.f90
 This fortran program taken in a vector of sobol points (0,1) uniformly distributed, and uses the Beasley-Springer-Moro algorithm to transform them to a normal distribution. 
 
 ### sobol.f90
-Old Fortran code for generating scrambled and non-scrambled sobol points (FSU John Burkardt). 
+Fortran code for generating scrambled and non-scrambled sobol points (see FSU John Burkardt for src code). 
 The code is used to run the i8_sobol function called in the sobol_stdnormal subroutine.
 
 ### Compile.sh
@@ -23,16 +22,3 @@ A sample bash compile file for running the program. Simply run
 ### herm_mat.f90
 The main program.
 
-#### Important Variables
-`Nsobol`: Integer, number of sobol points to be generated for the entire simulation.
-
-`deg`: Integer, defines the order of Hermite Polynomial to calculate up to (index starts at 1 not 0), valid for the first ten polynomials. 
-
-
-`norm(d, Nsobol)`: DP, vector containing normal distribution sobol point. 
-
-`coef`: DP, Coefficient to multiply Hermite Polynomial by to get Wavefunction. 
-
-`herm`: DP, evaluating each hermite polynomial recursively up to deg.
-
-`A(deg,deg)`: DP, Potential Energy Matrix Elements for a single dimension (matrix is orthonormal, diagonal=1, off-diagonal=0). 
