@@ -1,3 +1,9 @@
+#=============================================================================80
+# The Tip4p and MB-Pol Potential Energy Surfaces are applied for integration.
+# See the work of Joel Bowman and Francesco Paesani for the specific surfaces if 
+# Interested
+# See the MCQMC wiki page for the sobol sequence generator (Fortran; ssobol.f).
+#==============================================================================#
 OBJS = Tip SSobol SS_std Lmon main
 FC = gfortran
 
