@@ -1,37 +1,23 @@
 # Vibrational Spectroscopy; Quasi-MC Methods
-Fortran-90 implementation of N-dimensional (N<10), k excitation (k<10) vibrational spectroscopy analysis for water clusters.
+Fortran-90 implementation of N-dimensional (N<10), k excitation (k<10) Fundamental Frequency analysis for water clusters.
 
-The program applies Quasi Monte Carlo methods for numerical integration of anharmonic terms in the fundamental frequencies and subsequent vibrational spectra of a water cluster. 
-Currently Sobol and Scrambled Sobol Sequences can be used to compute the normal modes, and fundamental frequencies for a sigle water atom within a water cluster. 
-
-### Current Developments
-Compute the fundamental frequencies for every water monomer in the cluster as indepedent calculations.
-Automate the data analysis for every calculation. 
+The program applies Quasi Monte Carlo methods for a numerical framework to compute the RoVibrational Hamiltonian of small water clusters.
+Ultimately Fundamental Frequencies for a given water cluster and Potential Energy Surface are Computed using normal mode coordinates and the local monomer approximation, combined with Sobol or Scrambled Sobol Quasi Monte Carlo methods. 
 
 ## References
-The motivation for this project comes in part from previous works such as the Multimode Software by Bowman and etc. 
-Some reference papers for context are:
+RoVibrational Energy Calculations are an essential goal of Computational Chemistry. 
+Some related references and useful software are provided below for context. 
 
 #### General Method and Application Overview
-http://aip.scitation.org/doi/abs/10.1063/1.4829836 
+Quasi-Random Monte Carlo Methods applied to small water clusters can be found in the literature, for example see the work of [Georgescu and Mandelshtam](http://aip.scitation.org/doi/abs/10.1063/1.4829836).
 
-#### Numerical Methods
-http://aip.scitation.org/doi/abs/10.1063/1.4788977
+Basis construction and numemrical methods for computing fundamental frequencies through QMC can be found in the literature, for example see [Brown and Mandelshtam](http://aip.scitation.org/doi/abs/10.1063/1.4788977).
 
-http://aip.scitation.org/doi/abs/10.1063/1.4754819
+The application of the Local Monomer Approximation in the context of RoVibrational Spectroscopy can be found uin the Literature, see for example [Liu and Bowman](http://pubs.acs.org/doi/abs/10.1021/jp5061182).
 
-#### Local Monomer Approximation
-http://pubs.acs.org/doi/abs/10.1021/jp5061182
-
-#### Potential Energy Surfaces
-The MBPOL PES is currently being used for these calculations.
-http://paesanigroup.ucsd.edu/index.html
-
-The TIP4P PES has also been implemented. 
-
-#### Quasi MC Code:
-Currently utilizing the scrambled sobol Fortran code made available on the MCQMC wiki page (ssobol.f).
-http://roth.cs.kuleuven.be/wiki/Public_software
+#### Quasirandom Sequences:
+The Monte Carlo and Quasi-Monte Carlo Wiki page ([MCQMC](http://roth.cs.kuleuven.be/wiki/Main_Page)) is a useful resource for generating and applying Monte Carlo methods. 
+We are currently utilizing the [Scrambled Sobol Sequence Generator](http://roth.cs.kuleuven.be/wiki/Public_software) made available for Fortran implementations (ssobol.f). 
 
 ## Authors
 Shane W. Flynn, Vladimir A. Mandelshtam. 2017. UCI
