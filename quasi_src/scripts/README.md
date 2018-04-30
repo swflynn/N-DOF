@@ -1,6 +1,5 @@
 # Working Scripts
-Collection of various programs I have written during the development of the project. 
-All of these were working at the time of their development, however, the main code is the only version being maintained. 
+Collection of various programs written during project development.
 
 ### nD_PE_matrix:
 Fortran-90 script for calculating any dimensional (D<10) any excitation (k<10) Harmonic Oscillator Potential Energy matrix.
@@ -51,11 +50,12 @@ Code only computes the PE matrix was the previous main need to make this github 
 
 ### qMC_nm:
 Need to make this github ready. First code for monomer doing fundamental analysis. 
+(Currently the program mian as of 4-27-18). 
 
 # Open Source Code
 The following codes are/have been used during the project.
 Please see the original documentation for more details, and give proper reference to the authors. 
-Many thanks to all the authors who have made these codes available, I have found them to be extremly helpful throughout this project
+Many thanks to all the authors who have made these codes available, I have found them to be extremly helpful throughout this project.
 
 ## Sobol.f90 
 The Fortran-90 module used for Sobol Sequence Generation.
