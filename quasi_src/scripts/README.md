@@ -26,6 +26,10 @@ The code allows users to define which degree polynomial to calculate up to for t
 The points must be generated externally (a matlab script has been attached for doing this) see
 https://www.mathworks.com/help/stats/qrandset.scramble.html for matlab details. 
 
+### permutation:
+Fortran-90 script to determine the number of permutations available in a system with a d-dimensional wavefunction and a maximum total excitation constraint on the system. 
+The script requires an input dimensionality (must be less than 10), and a total excitation constraint, and computes the total number of permutations. 
+
 ### permutations:
 Fortran-90 script to determine the number of permutations available in a system with a d-dimensional wavefunction and a maximum excitation constraing of Vmax (the total number of excitations in the total wavefunction). 
 Input the spatial dimension and maximum excitation, output Jmax, and v(d,Jmax) containing all of the permutations. 
