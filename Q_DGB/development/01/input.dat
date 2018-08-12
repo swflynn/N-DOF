@@ -1,0 +1,4 @@
+test.xyz    ! input geometry
+2           ! number of Gaussians
+10           ! Number of sobol points
+1           ! number of evaluations
