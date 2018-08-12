@@ -6,10 +6,11 @@
 !Computing ground state energy/properties of water
 !==============================================================================!
 !    Modified:
-!       25 July 2018
+!       11 August 2018
 !    Author:
 !       Shane Flynn & Vladimir Mandelshtam
 !==============================================================================!
+! Full system calculation not working currently
 ! compute Potential Matrix
 !                           Things to Do
 ! compute matricies on the fly (lambda,kinetic)
