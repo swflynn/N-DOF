@@ -1,5 +1,5 @@
 OBJS = Sobol S_std 2D main
-FC = gfortran
+FC = gfortran -g -fcheck=all
 
 all: Sobol S_std 2D main
 
