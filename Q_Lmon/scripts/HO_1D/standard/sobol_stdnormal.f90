@@ -1,4 +1,3 @@
-
 !> Computes the inverse cumulative density function (CDF), i.e., the quantile,
 ! of the standard normal distribution given u uniform on the unit hypercube.
 FUNCTION beasley_springer_moro(u) result(x)
