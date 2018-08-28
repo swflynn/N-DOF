@@ -1,2 +1,5 @@
 test.xyz    ! input geometry
-2           ! number of Gaussians
+100          ! number of Gaussians
+100         !Number of sobol points
+100          ! alpha parameter
+10
