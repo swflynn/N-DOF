@@ -1,4 +1,3 @@
-
 !> Computes the inverse cumulative density function (CDF), i.e., the quantile,
 ! of the standard normal distribution given u uniform on the unit hypercube.
 FUNCTION beasley_springer_moro(u) result(x)
@@ -34,7 +33,6 @@ FUNCTION beasley_springer_moro(u) result(x)
             0.0000002888167364, &
             0.0000003960315187 /)
 
-
     y = u - 0.5D0
 
     DO j = 1, SIZE(u)
@@ -55,38 +53,7 @@ FUNCTION beasley_springer_moro(u) result(x)
     END DO
 
 END FUNCTION beasley_springer_moro
-
 !==============================================================================!
-
-
-!> Returns a d-dimensional Sobol sequence of p points following a standard
-!  normal distribution
-!subroutine sobol_stdnormal(d, skip, x_stdnormal)
-!    use sobol
-!    implicit none
-    !> dimension
-!    INTEGER(kind = 4), INTENT(IN) :: d
- 
-    !> number of initial points to be skipped
-!    INTEGER(kind = 8), INTENT(IN) :: skip   
-
-    !> return an array of doubles, standard normal
-!    DOUBLE PRECISION, DIMENSION(d), INTENT(OUT) :: x_stdnormal     
-
-!    interface
-!        FUNCTION beasley_springer_moro(u)
-!            double precision :: u(:)
-!            double precision :: beasley_springer_moro(size(u))
-!        end function beasley_springer_moro
-!    end interface
-
-!    x_stdnormal = beasley_springer_moro(i8_sobol(int(d, 8), skip))
-
-!END subroutine sobol_stdnormal
-
-!==============================================================================!
-
-
 !> Returns a d-dimensional Sobol sequence of p points following a standard
 !  normal distribution
 subroutine scrambled_sobol_stdnormal(d, scrambled_u, x_stdnormal)

@@ -1,0 +1,4 @@
+3           ! Maximum Excitation
+100         ! Number of Sobol Points
+10          ! Convergence Frequency
+ss_unif     ! Scrambled Sequence File Name
