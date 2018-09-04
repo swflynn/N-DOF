@@ -1,6 +1,10 @@
 # Working Scripts
 Collection of various programs written during project development.
 
+### 1D_HO_matrix:
+Potential Energy Matrix evaluated numerically (Quasi-Monte Carlo) for a single dimension Quatum Harmonic Oscillator.
+User defines highest degree Hermite Polynomial (matrix is composed of all combinatorics over these excitations), and uses Normally Distributed Sobol Points for quasi-Monte Carlo integration. 
+
 ### nD_PE_matrix:
 Fortran-90 script for calculating any dimensional (D<10) any excitation (k<10) Harmonic Oscillator Potential Energy matrix.
 Modified hermite polynomials are used to compute the wavefunction, and QMC Sobol Sequences (normally distributed, Beasley-Springer-Moro) are used to perform numerical integration.
@@ -15,10 +19,6 @@ Eigenvalue and matrix element convergance as a function of iteration are availab
 No external field exists, wavefunctions are orthonormal, therefore matrix elements should be either 1(diagonal), or 0, eigenvalues should be 1. 
 Scrambled Sobol Sequences are generated using the matlab `scramble` utility, part of the `qrandset` class.
 The code simply needs a datafile containing each point to be evaluated.
-
-### 1D_HO_matrix:
-Fortran-90 script for calculating a 1D Harmonic Oscilator matrix (weighted by a Gaussian). 
-The code allows users to define which degree polynomial to calculate up to for the HO Matrix elements, and uses Normally Distributed Sobol Points for quasi-Monte Carlo integration. 
 
 ### 1D_s_HO_matrix:
 Fortran-90 script for calculating a 1D Harmonic Oscilator matrix (weighted by a Gaussian).
