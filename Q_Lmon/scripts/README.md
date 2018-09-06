@@ -55,7 +55,7 @@ http://people.sc.fsu.edu/~jburkardt/f_src/sobol/sobol.html
 ## ACM Collected Algorithms
 A collection of various algorithms, notably the various quasi-random sequence generators (647, 659)
 
-http://calgo.acm.org/ for source code. 
+http://calgo.acm.org/ 
 
 ## MCQMC Wiki Page
 Public Software containing MC, QMC, MCMC programs.
