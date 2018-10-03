@@ -1,3 +1,0 @@
-test.xyz    ! input geometry
-2           ! number of Gaussians
-1           ! numebr sobol points for MC 

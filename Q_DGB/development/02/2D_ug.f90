@@ -1,14 +1,18 @@
 !=============================================================================80
 !                 Distributed Gaussian Basis (Ground State Energy)
+!       02
 !==============================================================================!
 !    Discussion:
 !Distributed Gaussian Basis Set (DGB) 
-!Calculation for a 1D system only, single atom x coordinates, mass=1
+!Calculation for a 2D system only, single atom x,y coordinates, mass=1
 !==============================================================================!
 !    Modified:
-!       12 September 2018
+!       28 August 2018
 !    Author:
-!       Shane Flynn 
+!       Shane Flynn & Vladimir Mandelshtam
+!==============================================================================!
+!   Things To Do:
+! Fixed S factor
 !==============================================================================!
 module dgb_groundstate
 implicit none
@@ -18,11 +22,13 @@ implicit none
 !       Discussion:
 !Atomic Properties
 !alpha0                 ==> Scaling Parameter for Gaussians
+!c1,c2          constants for 2D potetnial, c1 > c2 to have positive Hessian
 !==============================================================================!
 double precision, parameter :: Hmass=1d0
 double precision, parameter :: alpha0=1d0
-double precision, parameter :: pi=4.*atan(1d0)
-double precision, parameter :: c1=1d0
+double precision, parameter :: pi=4.0*atan(1d0)
+double precision, parameter :: c1=2d0
+double precision, parameter :: c2=1d0
 !==============================================================================!
 !                               Global Variables 
 !==============================================================================!
@@ -63,13 +69,13 @@ end function Atom_Mass
 subroutine Toy_Potential(x,energies)
 !==============================================================================!
 !       Discussion:
-! V := c1(x)^2 
-! 1D potential hard-coded
+! V := c1(x+y)^2 + c2(x-y)^2
+! 2D potential hard-coded
 !==============================================================================!
 implicit none
 double precision :: x(Dimen),energies
 energies=0d0
-energies = c1*(x(1))**2 
+energies = c1*(x(1)+x(2))**2 + c2*(x(1)-x(2))**2
 !write(*,*) 'Toy Energy from potential subroutine'
 !write(*,*) energies
 end subroutine Toy_Potential
@@ -83,9 +89,10 @@ subroutine Toy_Force(x,forces)
 implicit none
 integer :: i
 double precision :: x(Dimen),forces(Dimen)
-forces(1) = -(2.*x(1)*c1) 
-write(*,*) 'Toy Forces from force subroutine'
-write(*,*) forces
+forces(1) = -(2.*x(1)*(c1+c2) + 2.*x(2)*(c1-c2))
+forces(2) = -(2.*x(1)*(c1-c2) + 2.*x(2)*(c1+c2))
+!write(*,*) 'Toy Forces from force subroutine'
+!write(*,*) forces
 end subroutine Toy_Force
 !==============================================================================!
 subroutine Toy_Hessian(x,Hess_Mat)
@@ -216,11 +223,6 @@ read(*,*) coord_in
 read(*,*) NG
 read(*,*) Nsobol
 read(*,*) alpha_par
-read(*,*) data_freq
-!read(*,*) data_freq
-write(*,*) 'Number of Gaussians         ==> ', NG
-write(*,*) 'Number of Sobol points      ==> ', Nsobol
-!write(*,*) 'Partial Average Frequency   ==> ', data_freq
 skip=NG
 skip2=Nsobol
 write(*,*) 'Test 1; Successfully Read Input Data File!'
@@ -231,7 +233,7 @@ write(*,*) 'Test 1; Successfully Read Input Data File!'
 open(66,File=coord_in)
 read(66,*) Natoms
 read(66,*) 
-Dimen=1*Natoms 
+Dimen=2*Natoms 
 write(*,*) 'Dimensionality ==> ', Dimen
 !==============================================================================!
 allocate(atom_type(Natoms),mass(Natoms),sqrt_mass(Dimen),q0(Dimen),force(Dimen))
@@ -240,9 +242,9 @@ allocate(q(Dimen,NG),z(Dimen,NG),z2(Dimen,Nsobol),alpha(NG),lmat(NG,NG),Smat(NG,
 allocate(eigenvalues(NG),Tmat(NG,NG),Vmat(NG,NG),Hmat(NG,NG),q2(Dimen,Nsobol))
 !allocate(q3(Dimen,Nsobol, V1mat(NG,NG))
 do i=1,Natoms
-    read(66,*) atom_type(i), q0(1)   
+    read(66,*) atom_type(i), q0(2*i-1:2*i)   
     mass(i)=Atom_mass(atom_type(i))
-    sqrt_mass(1)=SQRT(mass(i))
+    sqrt_mass(2*i-1:2*i)=SQRT(mass(i))
 end do
 close(66)
 write(*,*) 'q0 ==> '
@@ -286,17 +288,6 @@ do ii=1,NG
         q(:,ii)=q(:,ii)+z(i,ii)*U(:,i)
     end do
 end do
-write(*,*) 'Testing Gaussian Centers'
-write(*,*) q
-!==============================================================================!
-!                   Compute Ground State Pre-factor
-! Need to add this in if needed. Not sure 9-9-18
-!==============================================================================! 
-!detO=1d0
-!do i=1,Dimen
-!    detO=detO*(Hess(i,i))
-!enddo
-!q = q*sqrt(detO/(2*pi)**dimen)
 write(*,*) 'Test 4; Successfully Generated Gaussian Centers'
 !==============================================================================!
 !                       Generate Alpha Scaling 
@@ -316,32 +307,26 @@ do i=1,NG
         lsum=0d0
         do k=1,dimen
             lsum=lsum+omega(k)*(q(k,i)-q(k,j))**2
-!           write(*,*) 'omega 1', omega(k)
-!            write(*,*) 'qi', q(k,i)
-!            write(*,*) 'qj', q(k,j)
         end do
         lmat(i,j) = exp(-lsum*(alpha(i)*alpha(j)/(2.*(alpha(i)+alpha(j)))))
         lmat(j,i) = lmat(i,j)
     end do
 end do
-write(*,*) 'exp(-lambda) matrix ==>'
-write(*,*) lmat
+!write(*,*) 'exp(-lambda)'
+!write(*,*) lmat
 !==============================================================================!
 !                           Overlap Matrix (S)
 ! scale by lambda when solving generalized eigenvalue problem
-!==============================================================================!
-! The Overlap Matrix is Computed Correct for 1D (9-9-18). checked numerically
 !==============================================================================!
 Smat=1d0
 prod_omega=1d0
 do k=1,Dimen
     prod_omega=prod_omega*omega(k)
 end do
-write(*,*) 'The product of omegas is '
-write(*,*) prod_omega
+write(*,*) 'prod omega', prod_omega
 do i=1,NG
     do j=i,NG
-        Smat(i,j) = sqrt(2.*pi/(prod_omega*(alpha(i)+alpha(j))))
+        Smat(i,j) = (2.*pi/(alpha(i)+alpha(j)))**(dimen/2.)*sqrt(1./prod_omega)
         Smat(j,i) = Smat(i,j)
     end do
 end do
@@ -351,8 +336,6 @@ end do
 !==============================================================================!
 S1mat=Smat
 S1mat=S1mat*Lmat
-write(*,*) 'Check Final Overlap Expression ==>'
-write(*,*)  S1mat
 eigenvalues=0d0
 lwork = max(1,3*NG-1)
 allocate(work(max(1,lwork)))
@@ -363,42 +346,37 @@ write(*,*) 'eigenvalues for Overlap matrix'
 write(*,*) eigenvalues
 !==============================================================================!
 !                           Kinetic Matrix (T)
-! The Kinetic Matrix is Computed Correct for 1D (9-9-18). checked numerically
-! The - sign in vlads derivation is wrong, see the mathematica page 
 !==============================================================================!
 Tmat=0d0
 Tpre=0d0
 Tsum=0d0
 do i=1,NG
     do j=i,NG
-        Tpre = alpha(i)*alpha(j)*(2*pi)**(dimen/2.) / (4*(alpha(i)+alpha(j))**(1+(dimen/2.)))
-!        write(*,*) 'Tpre factor', Tpre
+        Tpre = alpha(i)*alpha(j)*(2*pi)**(dimen/2.) / (2.*(alpha(i)+alpha(j))**(1+(dimen/2.)))
         Tsum=0d0
         do k=1,Dimen
-            Tsum=Tsum + (omega(k) - (2.*alpha(i)*alpha(j)*omega(k)**2*(q(k,i)-q(k,j))**2/(alpha(i)+alpha(j))))
+            Tsum=Tsum+(omega(k)-(alpha(i)*alpha(j)*omega(k)**2*(q(k,j)-q(k,i))**2/(alpha(i)+alpha(j))))
         end do
-!        write(*,*) 'Tsum factor', Tsum
-        Tmat(i,j) = Tpre*(prod_omega)**(-0.5)*Tsum
+        Tmat(j,i) = Tpre*(prod_omega)**(-0.5)*Tsum
         Tmat(j,i) = Tmat(i,j)
     end do
 end do
-write(*,*) 'Kinetic Matrix ==>'
-write(*,*) Tmat*Lmat
+!write(*,*) 'Kinetic Matrix'
+!write(*,*) Tmat
 !==============================================================================!
 !                   Generate Sequence For Evaluating Potential
-! Scale coordinates by 1/sqrt(2) to account for std norm dist.
 !==============================================================================!
 z2=0d0
 q2=0d0
 do ii=1,Nsobol
     call sobol_stdnormal(Dimen,skip2,z2(:,ii))
     do i=1,Dimen
-        q2(:,ii)=q2(:,ii)+z2(i,ii)*U(:,i)*(1/sqrt(2.))
+        q2(:,ii)=q2(:,ii)+z2(i,ii)*U(:,i)*(1./sqrt(2.))
     end do
 end do
 !==============================================================================!
-! I am here 9-10-18
 !                              Evaluate Potential 
+! Testing with V=1, need to remove when done 8-26-18
 !==============================================================================!
 Vmat=0d0
     do i=1,NG
@@ -412,18 +390,17 @@ Vmat=0d0
             Vmat(j,i)=Vmat(i,j)
         enddo
     enddo
-Vmat=Vmat*sqrt(2*pi)*prod_omega/Nsobol
-write(*,*) 'Vmat'
-write(*,*) Vmat*Lmat
+Vmat=Vmat*(2*pi)**(dimen/2.)*prod_omega**(-0.5)/Nsobol
+!write(*,*) 'Vmat'
+!write(*,*) Vmat*Lmat
 !==============================================================================!
 Hmat=Vmat
 Hmat=Hmat+Tmat
 Hmat=Hmat*Lmat
 S1mat=Smat
 S1mat=S1mat*Lmat
-write(*,*) 'Overlap matrix'
-write(*,*) S1mat
-
+!write(*,*) 'Overlap matrix'
+!write(*,*) S1mat
 itype=1
 eigenvalues=0d0
 lwork = max(1,3*NG-1)
@@ -434,15 +411,16 @@ write(*,*) 'info after ==>', info
 write(*,*) 'eigenvalues'
 write(*,*) eigenvalues
 
-write(*,*) 'True E0'
-write(*,*) .5*(omega(1))
+write(*,*) 'Computed,                   True Value'
+do i=1,NG
+    write(*,*) eigenvalues(i), ((i-1)+.5)*(omega(1) + omega(2)) 
+!    write(*,*) '%error', (eigenvalues(i) - ((i-1)+.5)*(omega(1)+omega(2)) / (((i-1)+.5)*(omega(1)+omega(2))))*100
+end do
 !==============================================================================!
 !                               output file                                    !
 !==============================================================================!
-open(90,file='simulation.dat')
-write(90,*) 'Natoms ==>', Natoms
-write(90,*) 'Dimensionality Input System ==>', Dimen 
-write(90,*) 'N_gauss ==>', NG
-write(*,*) 'Alpha Parameter ==>', alpha_par
-close(90)
+!open(90,file='simulation.dat')
+!write(90,*) 'Natoms ==>', Natoms
+!write(90,*) 'Dimensionality Input System ==>', Dimen !write(90,*) 'N_gauss ==>', NG
+!close(90)
 end program DGB_ground_state
