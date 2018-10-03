@@ -1,7 +1,7 @@
-OBJS = Sobol S_std 2D main
+OBJS = Sobol S_std 1D main
 FC = gfortran -g -fcheck=all
 
-all: Sobol S_std 2D main
+all: Sobol S_std 1D main
 
 Sobol:
 	$(FC) -c sobol.f90
@@ -9,11 +9,11 @@ Sobol:
 S_std:
 	$(FC) -c sobol_stdnormal.f90
 
-2D:
-	$(FC) -c 2D.f90 -llapack
+1D:
+	$(FC) -c 1D_gg.f90 -llapack
 
 main:
-	$(FC) -O 2D.o sobol.o sobol_stdnormal.o -llapack
+	$(FC) -O 1D_gg.o sobol.o sobol_stdnormal.o -llapack
 
 clean:
 	rm -rf *.o *.mod *.out $(OBJS)

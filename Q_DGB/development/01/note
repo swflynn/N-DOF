@@ -1,0 +1,4 @@
+10-2 
+1D gaussian hard coded potential, same code as 00 directoyr, however, points are generated using gaussian distribution not uniform
+There are some problems here (the alphas are set to a constant) need to generalize the alpha definition to ge thti scode to woork, still needs work
+requires sobol.f90

@@ -1,21 +1,15 @@
 !=============================================================================80
 !                 Distributed Gaussian Basis (Ground State Energy)
-!       02
 !==============================================================================!
 !    Discussion:
 !Distributed Gaussian Basis Set (DGB) 
-!Calculation for a 2D system only, single atom x,y coordinates, mass=1
+!Calculation for a 1D system only, single atom x coordinates, mass=1
+! set a gaussian grid
 !==============================================================================!
 !    Modified:
-!       28 August 2018
+!       17 September 2018
 !    Author:
-!       Shane Flynn & Vladimir Mandelshtam
-!==============================================================================!
-!   Things To Do:
-! compute potential matrix
-! fix prefactor for gaussian centers
-! Compute Kinetic on the fly 
-! Compute Lambda on the Fly
+!       Shane Flynn 
 !==============================================================================!
 module dgb_groundstate
 implicit none
@@ -25,13 +19,11 @@ implicit none
 !       Discussion:
 !Atomic Properties
 !alpha0                 ==> Scaling Parameter for Gaussians
-!c1,c2          constants for 2D potetnial, c1 > c2 to have positive Hessian
 !==============================================================================!
 double precision, parameter :: Hmass=1d0
 double precision, parameter :: alpha0=1d0
-double precision, parameter :: pi=4.0*atan(1d0)
-double precision, parameter :: c1=2d0
-double precision, parameter :: c2=1d0
+double precision, parameter :: pi=4.*atan(1d0)
+double precision, parameter :: c1=1d0
 !==============================================================================!
 !                               Global Variables 
 !==============================================================================!
@@ -72,13 +64,13 @@ end function Atom_Mass
 subroutine Toy_Potential(x,energies)
 !==============================================================================!
 !       Discussion:
-! V := c1(x+y)^2 + c2(x-y)^2
-! 2D potential hard-coded
+! V := 1/2 c1(x)^2 
+! 1D potential hard-coded
 !==============================================================================!
 implicit none
 double precision :: x(Dimen),energies
 energies=0d0
-energies = c1*(x(1)+x(2))**2 + c2*(x(1)-x(2))**2
+energies = c1*.5*(x(1))**2 
 !write(*,*) 'Toy Energy from potential subroutine'
 !write(*,*) energies
 end subroutine Toy_Potential
@@ -87,13 +79,12 @@ end subroutine Toy_Potential
 subroutine Toy_Force(x,forces)
 !==============================================================================!
 !       Discussion:
-! Toy Forces, hardcoded for 2D potential
+! Toy Forces, hardcoded for 1D potential
 !==============================================================================!
 implicit none
 integer :: i
 double precision :: x(Dimen),forces(Dimen)
-forces(1) = -(2.*x(1)*(c1+c2) + 2.*x(2)*(c1-c2))
-forces(2) = -(2.*x(1)*(c1-c2) + 2.*x(2)*(c1+c2))
+forces(1) = -(x(1)*c1) 
 write(*,*) 'Toy Forces from force subroutine'
 write(*,*) forces
 end subroutine Toy_Force
@@ -201,13 +192,14 @@ use dgb_groundstate
 !==============================================================================!
 implicit none
 character(len=50) :: coord_in
-integer :: NG,Nsobol,data_freq
-integer :: i,j,k,n,counter
+integer :: NG,Nsobol
+integer :: i,j,k,n,counter,iter
 integer*8 :: ii,skip,skip2
-double precision :: E0,detO,lsum,prod_omega,Tsum,pot_ene,alpha_par
-!integer :: data_freq
+double precision :: E0,detO,lsum,prod_omega,Tsum,pot_ene,alpha_par,Tpre
+double precision :: low_bound, renorm
 !==============================================================================!
 double precision, allocatable :: q0(:),force(:),q(:,:),q2(:,:)
+double precision, allocatable :: Imat(:,:)
 double precision, allocatable :: Hess(:,:),omega(:),U(:,:),z(:,:),z2(:,:),alpha(:)
 double precision, allocatable :: lmat(:,:),Smat(:,:),S1mat(:,:),eigenvalues(:)
 double precision, allocatable :: Tmat(:,:),Vmat(:,:),Hmat(:,:)
@@ -226,11 +218,7 @@ read(*,*) coord_in
 read(*,*) NG
 read(*,*) Nsobol
 read(*,*) alpha_par
-read(*,*) data_freq
-!read(*,*) data_freq
-write(*,*) 'Number of Gaussians         ==> ', NG
-write(*,*) 'Number of Sobol points      ==> ', Nsobol
-!write(*,*) 'Partial Average Frequency   ==> ', data_freq
+read(*,*) low_bound
 skip=NG
 skip2=Nsobol
 write(*,*) 'Test 1; Successfully Read Input Data File!'
@@ -241,18 +229,19 @@ write(*,*) 'Test 1; Successfully Read Input Data File!'
 open(66,File=coord_in)
 read(66,*) Natoms
 read(66,*) 
-Dimen=2*Natoms 
+Dimen=1*Natoms 
 write(*,*) 'Dimensionality ==> ', Dimen
 !==============================================================================!
 allocate(atom_type(Natoms),mass(Natoms),sqrt_mass(Dimen),q0(Dimen),force(Dimen))
 allocate(Hess(Dimen,Dimen),omega(Dimen),U(Dimen,Dimen))
 allocate(q(Dimen,NG),z(Dimen,NG),z2(Dimen,Nsobol),alpha(NG),lmat(NG,NG),Smat(NG,NG),S1mat(NG,NG))
 allocate(eigenvalues(NG),Tmat(NG,NG),Vmat(NG,NG),Hmat(NG,NG),q2(Dimen,Nsobol))
+allocate(Imat(NG,NG))
 !allocate(q3(Dimen,Nsobol, V1mat(NG,NG))
 do i=1,Natoms
-    read(66,*) atom_type(i), q0(2*i-1:2*i)   
+    read(66,*) atom_type(i), q0(1)   
     mass(i)=Atom_mass(atom_type(i))
-    sqrt_mass(2*i-1:2*i)=SQRT(mass(i))
+    sqrt_mass(1)=SQRT(mass(i))
 end do
 close(66)
 write(*,*) 'q0 ==> '
@@ -286,25 +275,28 @@ write(*,*)  U
 write(*,*) 'Test 3; Successfully Determined Normal Modes'
 !==============================================================================!
 !                       Generate Gaussian Centers (q^i)
+! write them to a file (give y value of 1 just so I can plot
+! this only works for 1D, need to change/remove for others
+! Generate centers on a grid uniform spacing 1--1 / NG = delta x
+! run from -5,5 use 20 gaussians and asjust lpha
+! ill condition when alpha gets to largre no longer linear indepedent
 !==============================================================================!
 z=0d0
 q=0d0
+open(unit=17,file='centers.dat')
 do ii=1,NG
-    call sobol_stdnormal(Dimen,skip,z(:,ii))
-    q(:,ii)=q0(:)
+    call sobol_Stdnormal(Dimen,skip,z(:,ii))
+    q(:,ii) = q0(:)
     do i=1,Dimen
         q(:,ii)=q(:,ii)+z(i,ii)*U(:,i)
-    end do
-end do
+    enddo
+    write(17,*) q(:,ii),1
+enddo
+close(17)
 !==============================================================================!
 !                   Compute Ground State Pre-factor
-! Not sure if this is correct, need to check this
+! Need to add this in if needed. Not sure 9-9-18
 !==============================================================================! 
-detO=1d0
-do i=1,Dimen
-    detO=detO*(Hess(i,i))
-enddo
-q = q*sqrt(detO/(2*pi)**dimen)
 write(*,*) 'Test 4; Successfully Generated Gaussian Centers'
 !==============================================================================!
 !                       Generate Alpha Scaling 
@@ -317,9 +309,7 @@ write(*,*) 'alpha scaling'
 write(*,*) alpha
 !==============================================================================!
 !                       Lambda matrix lmat(NG,NG)
-! using for testing
-! once done re-write this to compute on the fly
-! Only scale by lambda at the end when you are passing in values to Hamiltonian
+! re-write this to compute on the fly
 !==============================================================================!
 do i=1,NG
     do j=i,NG
@@ -327,26 +317,28 @@ do i=1,NG
         do k=1,dimen
             lsum=lsum+omega(k)*(q(k,i)-q(k,j))**2
         end do
-        lmat(i,j) = alpha(i)*alpha(j)/(2*(alpha(i)+alpha(j)))*lsum
+        lmat(i,j) = exp(-lsum*(alpha(i)*alpha(j)/(2.*(alpha(i)+alpha(j)))))
         lmat(j,i) = lmat(i,j)
     end do
 end do
-lmat=exp(-lmat)
-write(*,*) 'Here is lambda'
-write(*,*) lmat
+!write(*,*) 'exp(-lambda) matrix ==>'
+!write(*,*) lmat
 !==============================================================================!
 !                           Overlap Matrix (S)
 ! scale by lambda when solving generalized eigenvalue problem
+!==============================================================================!
+! The Overlap Matrix is Computed Correct for 1D (9-9-18). checked numerically
 !==============================================================================!
 Smat=1d0
 prod_omega=1d0
 do k=1,Dimen
     prod_omega=prod_omega*omega(k)
 end do
-prod_omega=prod_omega**(-.5)
+write(*,*) 'The product of omegas is '
+write(*,*) prod_omega
 do i=1,NG
     do j=i,NG
-        Smat(i,j) = prod_omega*sqrt(2.0*pi/(alpha(i)+alpha(j)))
+        Smat(i,j) = sqrt(2.*pi/(prod_omega*(alpha(i)+alpha(j))))
         Smat(j,i) = Smat(i,j)
     end do
 end do
@@ -356,6 +348,8 @@ end do
 !==============================================================================!
 S1mat=Smat
 S1mat=S1mat*Lmat
+write(*,*) 'Check Final Overlap Expression ==>'
+!write(*,*)  S1mat
 eigenvalues=0d0
 lwork = max(1,3*NG-1)
 allocate(work(max(1,lwork)))
@@ -363,49 +357,64 @@ write(*,*) 'info ==>', info
 CALL dsyev('n', 'u', NG, S1mat, NG, eigenvalues, work, Lwork, info)
 write(*,*) 'info ==>', info
 write(*,*) 'eigenvalues for Overlap matrix'
-write(*,*) eigenvalues
+!write(*,*) eigenvalues
+do i=1,NG
+write(*,*) eigenvalues(i)
+end do
 !==============================================================================!
 !                           Kinetic Matrix (T)
+! The Kinetic Matrix is Computed Correct for 1D (9-9-18). checked numerically
+! The - sign in vlads derivation is wrong, see the mathematica page 
+! Playing with numbers the commented out lines are from the equation sheet
+! from playing with constats I get very close to correct result. Need to prove this
 !==============================================================================!
-Tmat = 0d0
+Tmat=0d0
+Tpre=0d0
+Tsum=0d0
 do i=1,NG
     do j=i,NG
+        Tpre = alpha(i)*alpha(j)*(2*pi)**(dimen/2.) / (2*(alpha(i)+alpha(j))**(1+(dimen/2.)))
         Tsum=0d0
         do k=1,Dimen
-            Tsum=Tsum+(omega(k)*(1.-(2.*alpha(i)*alpha(j)/(alpha(i)+alpha(j)))*omega(k)*(q(k,i)-q(k,j))**2))
+            Tsum=Tsum + (omega(k) - (alpha(i)*alpha(j)*omega(k)**2*(q(k,j)-q(k,i))**2/(alpha(i)+alpha(j))))
         end do
-        Tmat(i,j) = -prod_omega*Tsum*(alpha(i)*(alpha(j)*(2*pi)**(dimen/2.))/(4.*(alpha(i)+alpha(j))**(1.+dimen/2.)))
+        Tmat(i,j) = Tpre*(prod_omega)**(-0.5)*Tsum
         Tmat(j,i) = Tmat(i,j)
     end do
 end do
-write(*,*) 'Kinetic Matrix'
-write(*,*) Tmat
+!write(*,*) 'Kinetic Matrix ==>'
+!write(*,*) Tmat*Lmat
 !==============================================================================!
 !                   Generate Sequence For Evaluating Potential
+! Scale coordinates by 1/sqrt(2) to account for std norm dist.
 !==============================================================================!
 z2=0d0
 q2=0d0
 do ii=1,Nsobol
     call sobol_stdnormal(Dimen,skip2,z2(:,ii))
     do i=1,Dimen
-        q2(:,ii)=q2(:,ii)+z2(i,ii)*U(:,i)
+        q2(:,ii)=q2(:,ii)+z2(i,ii)*U(:,i)*(1/sqrt(2.))
     end do
 end do
 !==============================================================================!
+! I am here 9-10-18
 !                              Evaluate Potential 
 !==============================================================================!
 Vmat=0d0
-do i=1,NG
-    do j=i,NG
-        pot_ene=0d0
-        do n=1,Nsobol
-            call Toy_Potential(q2(:,n)+((alpha(i)*q(:,i)+alpha(j)*q(:,j))/(alpha(i)+alpha(j))),pot_ene)
-            Vmat(i,j)=Vmat(i,j)*(1/sqrt((alpha(i)+alpha(j))))+pot_ene
+    do i=1,NG
+        do j=i,NG
+            pot_ene=0d0
+            do n=1,Nsobol
+                call Toy_Potential(q2(:,n)+((alpha(i)*q(:,i)+alpha(j)*q(:,j))/(alpha(i)+alpha(j))),pot_ene)
+                Vmat(i,j)=Vmat(i,j)+pot_ene
+            enddo
+            Vmat(i,j) = Vmat(i,j)/sqrt(alpha(i)+alpha(j))
             Vmat(j,i)=Vmat(i,j)
-        end do
-    end do
-end do
-Vmat=Vmat/(Nsobol*prod_omega)
+        enddo
+    enddo
+Vmat=Vmat*(2*pi)**(dimen/2.)*(prod_omega)**(-0.5)/Nsobol
+!write(*,*) 'Vmat'
+!write(*,*) Vmat*Lmat
 !==============================================================================!
 Hmat=Vmat
 Hmat=Hmat+Tmat
@@ -413,7 +422,7 @@ Hmat=Hmat*Lmat
 S1mat=Smat
 S1mat=S1mat*Lmat
 write(*,*) 'Overlap matrix'
-write(*,*) S1mat
+!write(*,*) S1mat
 
 itype=1
 eigenvalues=0d0
@@ -425,64 +434,17 @@ write(*,*) 'info after ==>', info
 write(*,*) 'eigenvalues'
 write(*,*) eigenvalues
 
-write(*,*) '2D E0'
-write(*,*) .5*(omega(1)+omega(2))
-!!==============================================================================!
-!!                           Partial Average and Energy
-!! Check 'INFO' if you have an error, info>1 then overlap matrix isn't positive definite
-!! scale matricies by lambda at the end
-!!==============================================================================!
-!do i=1,NG
-    !do  j=1,NG
-        !Vmat(j,i) = Vmat(i,j)
-    !end do
-!end do
-!do i=1,NG
-!    do j=i,NG
-!    Hmat(i,j)=Vmat(i,j)/Nsobol
-!    Hmat(j,i) = Hmat(i,j)
-!    end do
-!end do
-!Hmat=Hmat+Tmat
-!S1=S
-!do i=1,NG
-!    do j=i,NG
-!        Hmat(i,j)=Hmat(i,j)*exp(-lmat(i,j))
-!        Hmat(j,i) = Hmat(i,j)
-!        S1(i,j)=S1(i,j)*exp(-lmat(i,j))
-!        S1(j,i) = S1(i,j)
-!    end do 
-!end do
-!write(*,*) 'Hamiltonian ===> '
-!write(*,*) Hmat
-!write(*,*) 'Scaled S1 ===> '
-!write(*,*) S1
-!
-!!val = S1(1,1)
-!!write(*,*) 'testing S remove when done'
-!!do i=1,NG
-!!do j=1,NG
-!!S1(i,j) = S1(i,j) / val
-!!end do 
-!!end do
-!!write(*,*) 'test S1'
-!!write(*,*) S1
-!
-!! DSYGV allocations
-!itype=1
-!eigenvalues=0d0
-!lwork = max(1,3*NG-1)
-!allocate(work(max(1,lwork)))
-!write(*,*) 'info ==>', info
-!CALL dsygv(itype, 'n', 'u', NG, Hmat, NG, S1, NG, eigenvalues, work, Lwork, info)
-!write(*,*) 'info after ==>', info
-!write(*,*) 'eigenvalues'
-!write(*,*) eigenvalues
-!!==============================================================================!
-!!                               output file                                    !
-!!==============================================================================!
-!open(90,file='simulation.dat')
-!write(90,*) 'Natoms ==>', Natoms
-!write(90,*) 'Dimensionality Input System ==>', Dimen !write(90,*) 'N_gauss ==>', NG
-!close(90)
+write(*,*) 'Computed,                   True Energy,                    %Error'
+do i=1,NG
+    write(*,*) eigenvalues(i), ((i-1)+.5)*omega(1), ((eigenvalues(i) - ((i-1)+.5)*omega(1))/(((i-1)+.5)*omega(1)))*100
+end do 
+!==============================================================================!
+!                               output file                                    !
+!==============================================================================!
+open(90,file='simulation.dat')
+write(90,*) 'Natoms ==>', Natoms
+write(90,*) 'Dimensionality Input System ==>', Dimen 
+write(90,*) 'N_gauss ==>', NG
+write(*,*) 'Alpha Parameter ==>', alpha_par
+close(90)
 end program DGB_ground_state

@@ -1,0 +1,4 @@
+1D hard coded harmonic potential
+This code seems to work fine, uses 1D uniform grid to compute generalized eigenvalue problem
+user defines size of grid to generate (upperbound-lowerbound)/NG = spacing
+needs sobol.f90 
