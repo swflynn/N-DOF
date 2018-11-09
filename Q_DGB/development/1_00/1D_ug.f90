@@ -1,14 +1,15 @@
 !=============================================================================80
 !                 Distributed Gaussian Basis (Ground State Energy)
 !==============================================================================!
+!    Things to Do:
+! Code seems to work, if higher dimensional case works that clean up and store
+!==============================================================================!
 !    Discussion:
 !Calculation for 1D system, single atom x coordinate, (mass=1)
 !New derivation using normal mode coordinates, uniform grid
 !==============================================================================!
 !    Modified:
-!       1 November 2018
-! This code seeems to have 1D case working, but unstable due to ill conditioned
-! S matrix. See dropbox for potential fix (this code is 1D equaitons nothing elsE)
+!       8 November 2018
 !    Author:
 !       Shane Flynn 
 !==============================================================================!
@@ -185,12 +186,14 @@ character(len=50) :: coord_in
 integer :: NG,Nsobol
 integer :: i,j,k,l,n
 integer*8 :: ii,skip,skip2
-double precision :: E0,Tsum,pot_ene,alpha_par,low_bound
+double precision :: E0,Tsum,pot_ene,alpha_par,lower,upper,h_par
+double precision :: peval,S_sum
 !==============================================================================!
 double precision, allocatable :: q0(:),force(:),r(:,:),r2(:),eigenvalues(:)
 double precision, allocatable :: Hess(:,:),omega(:),U(:,:),z(:,:),Smat(:,:)
 double precision, allocatable :: S1mat(:,:),alpha(:),Tmat(:,:),Vmat(:,:)
 double precision, allocatable :: Hmat(:,:)
+double precision, allocatable :: W(:,:),lambda(:),r_ij(:)
 !==============================================================================!
 !                           dsygv variables                                    !
 integer :: itype,info,lwork
@@ -202,7 +205,9 @@ read(*,*) coord_in
 read(*,*) NG
 read(*,*) Nsobol
 read(*,*) alpha_par
-read(*,*) low_bound
+read(*,*) lower 
+read(*,*) upper
+read(*,*) h_par
 skip=NG
 skip2=Nsobol
 write(*,*) 'Test 1; Successfully Read Input Data File!'
@@ -220,6 +225,7 @@ allocate(atom_type(Natoms),mass(Natoms),sqrt_mass(Dimen),q0(Dimen),force(Dimen))
 allocate(Hess(Dimen,Dimen),omega(Dimen),U(Dimen,Dimen),z(Dimen,Nsobol))
 allocate(r(Dimen,NG),alpha(NG),Smat(NG,NG),S1mat(NG,NG),eigenvalues(NG))
 allocate(Tmat(NG,NG),Vmat(NG,NG),Hmat(NG,NG),r2(Dimen))
+allocate(W(NG,NG),lambda(NG),r_ij(Dimen))
 do i=1,Natoms
     read(66,*) atom_type(i), q0(1)   
     mass(i)=Atom_mass(atom_type(i))
@@ -228,13 +234,11 @@ end do
 close(66)
 write(*,*) 'q0 ==> '
 write(*,*)  q0
-write(*,*) 'Test 2; Successfully Read Input Geometry File!'
 !==============================================================================!
-!                   Input Configuration Energy
+!                         Input Configuration Energy
 !==============================================================================!
 call toy_potential(q0,E0)
 write(*,*) 'E0 ==> ', E0
-write(*,*) 'Test 3; Successfully Evaluate Input Geometry Energy!'
 !==============================================================================!
 ! 			Compute Hessian and Frequencies
 !==============================================================================!
@@ -247,40 +251,26 @@ write(*,*) omega
 write(*,*) 'Hessian Eigenvectors ==> '
 write(*,*) U
 !==============================================================================!
-!               Generate Gaussian Centers (r^i) with a uniform grid
-! Assume centers are in normal-mode space r (not coordinate space q)
-! -5,5 is large enough for normal mode potential range
+!                 Generate Gaussian Centers with a uniform grid ! Assume centers are in normal-mode space r (not coordinate space q)
 !==============================================================================!
-r=0d0
 open(unit=17,file='centers.dat')
-r(:,1) = low_bound
-write(17,*) r(:,1), 1
-do ii=2,NG
-    r(:,ii) = r(:,ii-1) + (-low_bound - low_bound)/NG
-    write(17,*) r(:,ii), 1
-end do
+do i=1,NG
+    r(1,i)=lower+(i-1.)*(upper-lower)/(NG-1.)
+enddo
 close(17)
-write(*,*) 'r='
-write(*,*) r
 !==============================================================================!
 !                       Generate Alpha Scaling 
 ! A single paramater for each gaussian (the same across all dimensions)
-! set to a constant for testing purposes
 !==============================================================================!
 alpha=alpha_par
-write(*,*) 'alpha scaling'
-write(*,*) alpha
 !==============================================================================!
 !                           Overlap Matrix (S)
 !==============================================================================!
-Smat=1d0
-do k=1,dimen
-    do i=1,NG
-        do j=i,NG
-            Smat(i,j)=smat(i,j)*sqrt(2.*pi/((alpha(i)+alpha(j))*omega(k)))&
-            *exp(-alpha(i)*alpha(j)*omega(k)*(r(k,i)-r(k,j))**2/(2.*(alpha(i)+alpha(j))))
-            Smat(j,i)=Smat(i,j)
-        enddo
+do i=1,NG
+    do j=i,NG
+        S_sum =sum(omega(:)*(r(:,i)-r(:,j))**2)
+        Smat(i,j) = sqrt(alpha(i)+alpha(j))**(-dimen)*exp(-0.5*alpha(i)*alpha(j)/(alpha(i)+alpha(j))*S_sum)
+        Smat(j,i)=Smat(i,j)
     enddo
 enddo
 write(*,*) 'smat'
@@ -289,30 +279,43 @@ write(*,*) smat
 !                   Check to see if S is positive definite
 ! If this is removed, you need to allocate llapack arrays before Hamiltonian 
 !==============================================================================!
-S1mat=Smat
-eigenvalues=0d0
+W=Smat
 lwork = max(1,3*NG-1)
 allocate(work(max(1,lwork)))
 write(*,*) 'info ==>', info
-CALL dsyev('n', 'u', NG, S1mat, NG, eigenvalues, work, Lwork, info)
+CALL dsyev('v', 'u', NG, W, NG, lambda, work, Lwork, info)
 write(*,*) 'info ==>', info
-write(*,*) 'eigenvalues for Overlap matrix'
+write(*,*) 'Overlap Matrix Eigenvalues'
 do i=1,NG
-    write(*,*) eigenvalues(i)
-end do
+    write(*,*) lambda(i)
+enddo
+!==============================================================================!
+!                       Compute Reglarized S
+! Let W be the eigenvectors of S T(NG,NG),lambda(NG) the eigenvalues
+!==============================================================================!
+h_par=h_par*lambda(NG)
+write(*,*) 'hpar', h_par
+do i=1,NG
+    if(lambda(i)<h_par) then
+        write(*,*) 'replacing eigenvalue', i
+        lambda(i)=h_par
+    endif
+enddo
+do i=1,NG
+   do j=1,NG
+      Smat(i,j)=sum(W(i,:)*W(j,:)*lambda(:))        
+   enddo
+enddo
+write(*,*) 'smat regularized'
+write(*,*) smat
 !==============================================================================!
 !                           Kinetic Matrix (T)
 !Consider optimizing the expression (reduce number of operations)===>future work
 !==============================================================================!
-Tmat=0d0
 do i=1,NG
     do j=i,NG
-        Tsum=0d0
-        do k=1,Dimen
-            Tsum =Tsum+(alpha(i)*alpha(j)*omega(k)/(2.*(alpha(i)+alpha(j))))&
-            &*(1.-(alpha(i)*alpha(j)*(omega(k)*(r(k,i)-r(k,j))**2)/(alpha(i)+alpha(j))))
-        end do
-        Tmat(i,j) = Smat(i,j)*Tsum
+        Tmat(i,j)=Smat(i,j)*0.5*alpha(i)*alpha(j)/(alpha(i)+alpha(j))*&
+        sum(omega(:)-(alpha(i)*alpha(j)*(omega(:)**2*(r(:,i)-r(:,j))**2)/(alpha(i)+alpha(j))))
         Tmat(j,i) = Tmat(i,j)
     end do
 end do
@@ -327,34 +330,20 @@ do ii=1,Nsobol
 end do
 !==============================================================================!
 !                              Evaluate Potential 
-! I am here
 !==============================================================================!
 Vmat=0d0
 do i=1,NG
-    do j=i,NG
+   do j=i,NG
+      r_ij(:)= (alpha(i)*r(:,i)+alpha(j)*r(:,j))/(alpha(i)+alpha(j))
         do l=1,Nsobol
-            r2(:) = z(:,l) * 1./sqrt(omega(:)*(alpha(i)+alpha(j))) + &
-                (alpha(i)*r(:,i)+alpha(j)*r(:,j)/(alpha(i)+alpha(j)))
-            call Toy_Potential((q0+(matmul(U,r2(:))/sqrt_mass(:))),pot_ene)
+            r2(:) = r_ij(:)+z(:,l) / sqrt(omega(:)*(alpha(i)+alpha(j)))
+!           call Toy_Potential(q0+sum(U(k,:)*r2(:))/sqrt_mass(:),pot_ene)
+           call Toy_Potential((q0+matmul(U,r2)/sqrt_mass(:)),pot_ene)
             Vmat(i,j)=Vmat(i,j)+pot_ene
-            Vmat(j,i)=Vmat(i,j)
         enddo
+            Vmat(j,i)=Vmat(i,j)
     enddo
 enddo
-!==============================================================================!
-!==============================================================================!
-!==============================================================================!
-!do i=1,NG
-!    do j=i,NG
-!        do l=1,Nsobol
-!            r2(:) = z(:,l) * (omega(:)*(alpha(i)+alpha(j)))**(-0.5) + &
-!                (alpha(i)*r(:,i)+alpha(j)*r(:,j)/(alpha(i)+alpha(j)))
-!            call Toy_Potential((q0+(matmul(U,r2(:))/sqrt_mass(:))),pot_ene)
-!            Vmat(i,j)=Vmat(i,j)+pot_ene
-!            Vmat(j,i)=Vmat(i,j)
-!        enddo
-!    enddo
-!enddo
 Vmat=Vmat*Smat/Nsobol
 write(*,*) 'vmat'
 write(*,*) Vmat
@@ -373,7 +362,7 @@ eigenvalues=0d0
 !!allocate(work(max(1,lwork)))
 !==============================================================================!
 write(*,*) 'info ==>', info
-CALL dsygv(itype, 'n', 'u', NG, Hmat, NG, S1mat, NG, eigenvalues, work, Lwork, info)
+CALL dsygv(itype, 'n', 'u', NG, Hmat, NG, S1mat, NG, eigenvalues, work, Lwork, info) 
 write(*,*) 'info after ==>', info
 write(*,*) 'Computed,                   True Energy,                    %Error'
 do i=1,NG
