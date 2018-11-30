@@ -1,0 +1,8 @@
+11-27-18
+First draft uding dgb to compute monomer
+I am in the process of converting to subdimension calculations. 
+
+Currently there are some issues with the overlap matrix not being positive definite
+This is probably a result of an incorrect equation (most likely the alpha(r) calcaulations which had a problem in 2D toy model as well.
+
+This code is before I started doing the subspace calculations and optiminzing the code
