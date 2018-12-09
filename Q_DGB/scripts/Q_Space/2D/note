@@ -1,0 +1,5 @@
+10-10-18
+The code is clearly off by a factor (looks like a square root 2 perhaps)
+Means something is wrong the the equations dimensionality depedence
+This code has not been resolved, and has been abandoned for the rspace calculations
+If you want to use this code go back to the equations. 
