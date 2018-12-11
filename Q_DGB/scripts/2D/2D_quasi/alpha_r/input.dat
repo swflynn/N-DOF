@@ -1,0 +1,3 @@
+2D_geometry.xyz    !input geometry
+50               !number of Gaussians
+1000               !Number of sobol points
