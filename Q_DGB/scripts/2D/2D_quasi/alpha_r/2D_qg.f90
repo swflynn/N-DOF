@@ -18,7 +18,7 @@ implicit none
 !==============================================================================!
 double precision,parameter::Hmass=1d0
 double precision,parameter::pi=4.*atan(1d0)
-double precision,parameter::alpha0=1d0      ! alpha(r) parameter
+!double precision,parameter::alpha0=10.0      ! alpha(r) parameter
 !==============================================================================!
 !                            Global Variables 
 !==============================================================================!
@@ -179,7 +179,7 @@ character(len=50)::coord_in
 integer::NG,Nsobol
 integer::i,j,k,l,n,counter
 integer*8::ii,skip,skip2
-double precision::E0,Tsum,pot_ene,s_sum
+double precision::E0,Tsum,pot_ene,s_sum,alpha0
 !==============================================================================!
 double precision,allocatable::q0(:),force(:),r(:,:),r2(:),eigenvalues(:)
 double precision,allocatable::Hess(:,:),omega(:),U(:,:),z(:,:),z2(:,:)
@@ -196,6 +196,7 @@ double precision,allocatable::work(:)
 read(*,*) coord_in
 read(*,*) NG
 read(*,*) Nsobol
+read(*,*) alpha0
 skip=NG
 skip2=Nsobol
 write(*,*) 'Test 1; Successfully Read Input Data File!'
@@ -250,7 +251,7 @@ enddo
 !                       Generate Alpha Scaling 
 !==============================================================================!
 do i=1,NG
-    alpha(i)=alpha0*exp(-1./dimen*sum(r(:,i)**2*omega(:)))
+    alpha(i)=alpha0*NG**(2./dimen)*exp(-sum(r(:,i)**2*omega(:))/dimen)
 enddo
 open(unit=17,file='centers.dat')
 do i=1,NG
