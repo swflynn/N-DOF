@@ -158,7 +158,6 @@ use dgb_groundstate
 !Hmat           ==> (NG,NG): Hamiltonian Matrix (V+T) for eigenvalue problem
 !eigenvalues    ==> (NG): Eigenvalues of the Hamiltonian Matrix
 !lambda         ==> (NG): Eigenvalues of the Overlap Matrix
-!r_ij           ==> center of the i,j matrix element 
 !E0             ==> Energy Evaluation at the minimum configuration
 !pot_ene        ==> Potential Energy evaluated in q space
 !lmat           ==> (NG,NG): Lambda Matrix 
@@ -338,7 +337,7 @@ do i=1,NG
     enddo
 enddo
 Vmat=Vmat*(2*pi)**(dimen/2.)*(prod_omega)**(-0.5)/Nsobol
-write(*,*) 'Test 7; Successfully Computed Potential Matrix'
+write(*,*) 'Test 6; Successfully Computed Potential Matrix'
 !==============================================================================!
 Hmat=Vmat
 Hmat=Hmat+Tmat
