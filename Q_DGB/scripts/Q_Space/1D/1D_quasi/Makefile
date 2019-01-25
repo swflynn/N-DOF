@@ -10,10 +10,10 @@ S_std:
 	$(FC) -c sobol_stdnormal.f90
 
 1D:
-	$(FC) -c 1D_gg.f90 -llapack
+	$(FC) -c 1D_qg.f90 -llapack
 
 main:
-	$(FC) -O 1D_gg.o sobol.o sobol_stdnormal.o -llapack
+	$(FC) -O 1D_qg.o sobol.o sobol_stdnormal.o -llapack
 
 clean:
 	rm -rf *.o *.mod *.out $(OBJS)
