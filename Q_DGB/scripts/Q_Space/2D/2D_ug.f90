@@ -1,11 +1,15 @@
 !=============================================================================80
-!                 Distributed Gaussian Basis (Ground State Energy)
+!           2D-Distributed Gaussian Basis (Coordinate Space Formulation)
 !==============================================================================!
 !       Discussion:
 !DGB analysis for 2D seperable potential energy (hard-coded) 
-!Cartesian Coordinates, Integration with uniform grid
-!All gaussians have the same width (alpha parameter) 
-!Single atom x,y coordinates, mass=1
+!Equations are formulated assuming Cartesian Coordinates
+!Gaussian Centers selected with Uniform Grid (same widths)
+!                          Code Not Working
+!The eigenvalues are off by a factor, and this formulation of the project has
+!been dropped. Incorrect transformations are being used in this code and 
+!would need to be fixed. See normal-mode coordinates/calculations for working 
+!formulation and code. 
 !==============================================================================!
 !    Modified:
 !       10 October 2018
@@ -37,7 +41,6 @@ contains
 function Atom_Mass(atom)
 !==============================================================================!
 !       Discussion:
-!Assign atom masses
 !==============================================================================!
 implicit none
 double precision::Atom_Mass
@@ -46,8 +49,7 @@ if(atom=='H'.or.atom=='h')then
     Atom_mass=Hmass
 else 
     write(*,*) 'atom ', atom, ' is not recognized'
-    write(*,*) 'Check Atom_Mass Function in the dgb module'
-    stop 
+    stop 'Check Atom_Mass Function'
 endif
 end function Atom_Mass
 !==============================================================================!
@@ -61,7 +63,6 @@ implicit none
 double precision::x(dimen),energies
 energies=0d0
 energies=c1*(x(1))**2+c2*(x(2))**2
-!write(*,*) 'Energy from Toy_Potential Subroutine', energies
 end subroutine Toy_Potential
 !==============================================================================!
 subroutine Toy_Force(x,forces)
@@ -71,20 +72,17 @@ subroutine Toy_Force(x,forces)
 !Forces are hard-coded based on Toy_Potential 
 !==============================================================================!
 implicit none
-integer :: i
+integer::i
 double precision::x(Dimen),forces(Dimen)
 forces(1)=-c1*x(1)
 forces(2)=-c2*x(2)
-!write(*,*) 'Forces from Toy_Force Subroutine', forces
 end subroutine Toy_Force
 !==============================================================================!
 subroutine Toy_Hessian(x,Hess_Mat)
 !==============================================================================!
 !       Discussion:
 !Numerically computed Hessian using forces from Toy_Force Subroutine
-!Hessian is defined at the minimum (requires minimum configuration xyz)
-!       Variables:
-!s          ==> Perturbation parameter for computing Hessian
+!s          ==> Perturbation Parameter 
 !Hess_Mat   ==> (Dimen,Dimen); Symmetrized Mass-Scaled Hessian
 !x          ==> (Dimen); XYZ Configuration at minimum
 !==============================================================================!
@@ -95,8 +93,6 @@ double precision::force0(Dimen)
 double precision,parameter::s=1d-6
 r=x
 call Toy_Force(r, force0)
-write(*,*) 'Force0 Hessian ==>'
-write(*,*) force0
 do i=1,Dimen
     r(i)=x(i)+s
     call Toy_Force(r, force)
@@ -105,11 +101,10 @@ do i=1,Dimen
         Hess_Mat(i,j)=(force0(j)-force(j))/s
     enddo
 enddo
-write(*,*) 'Hessian matrix subroutine ==>'
 write(*,*) Hess_Mat
 !==============================================================================!
+!                   Symmetrize and Mass-Scale the Hessian
 !==============================================================================!
-! symmetrize and mass scale the Hessian
 do i=1,Dimen
     do j=1,i
         if(i.ne.j) Hess_Mat(i,j)=(Hess_Mat(i,j)+Hess_Mat(j,i))/2
@@ -117,7 +112,6 @@ do i=1,Dimen
         if(i.ne.j) Hess_Mat(j,i)=Hess_Mat(i,j)
     enddo
 enddo
-!write(*,*) 'Hessian from Toy_Hessian Subroutine ==> ', Hess_Mat
 end subroutine Toy_Hessian
 !==============================================================================!
 subroutine Frequencies_From_Hess(Dimen,Hess,omega,U)
@@ -125,10 +119,9 @@ subroutine Frequencies_From_Hess(Dimen,Hess,omega,U)
 !       Discussion:
 !Compute Eigenvalues and Eigenvectors of Hessian
 !Uses the LLAPACK real symmetric eigen-solver (dsygev)
-!       Variables:
 !Hess   ==> (Dimen,Dimen); Hessian Matrix
 !omega  ==> (Dimen); Eigenvalues of the Hessian
-!U      ==> (Dimen,Dimen); Hessian Eigenvectors
+!U      ==> (Dimen,Dimen); Eigenvectors of the Hessian
 !       LLAPACK (dsyev):
 !v      ==> Compute both Eigenvalues and Eigenvectors
 !u      ==> Use Upper-Triangle of matrix
@@ -146,7 +139,6 @@ do i=Dimen,1,-1
     omega(i)=sign(sqrt(abs(omega(i))),omega(i))
     write(*,*) omega(i), 'normalized = 1?',sum(U(:,i)**2)
 enddo
-!write(*,*) 'Frequencies_From_Hess Subroutine', omega
 end subroutine frequencies_from_Hess
 !==============================================================================!
 end module dgb_groundstate
@@ -179,7 +171,6 @@ use dgb_groundstate
 !Hmat           ==> (NG,NG): Hamiltonian Matrix (V+T) for eigenvalue problem
 !eigenvalues    ==> (NG): Eigenvalues of the Hamiltonian Matrix
 !lambda         ==> (NG): Eigenvalues of the Overlap Matrix
-!r_ij           ==> center of the i,j matrix element
 !E0             ==> Energy Evaluation at the minimum configuration
 !pot_ene        ==> Potential Energy evaluated in q space
 !==============================================================================!
@@ -239,10 +230,7 @@ write(*,*) 'E0 ==> ', E0
 ! 			Hessian and Frequencies
 !==============================================================================!
 call Toy_Hessian(q0, Hess)
-write(*,*) 'Mass-Scaled Hessian ==>', Hess
 call Frequencies_From_Hess(Dimen,Hess,omega,U)
-write(*,*) 'Hessian Eigenvalues ==> ', omega
-write(*,*) 'Hessian Eigenvectors ==> ', U
 write(*,*) 'Test 2; Successfully Computed Hessian'
 !==============================================================================!
 !                 Scale Eigenvectors to Std.Normal.Dist
@@ -294,7 +282,6 @@ do i=1,NG
         lmat(j,i)=lmat(i,j)
     enddo
 enddo
-!write(*,*) 'exp(-lambda) matrix ==> ', lmat
 !==============================================================================!
 !                           Overlap Matrix
 !==============================================================================!
@@ -309,7 +296,6 @@ do i=1,NG
         Smat(j,i)=Smat(i,j)
     enddo
 enddo
-write(*,*) 'Test 4; Successfully Computed Overlap Matrix'
 !==============================================================================!
 !                    Check if S is Positive Definite
 !If this is removed, you need to allocate llapack arrays before Hamiltonian 
@@ -326,6 +312,7 @@ do i=1,NG
     write(17,*) eigenvalues(i)
 enddo
 close(17)
+write(*,*) 'Test 4; Successfully Computed Overlap Matrix'
 !==============================================================================!
 !                           Kinetic Matrix
 !==============================================================================!
@@ -333,11 +320,12 @@ Tmat=0d0
 Tpre=0d0
 do i=1,NG
     do j=i,NG
-        Tpre=alpha(i)*alpha(j)*(2*pi)**(dimen/2.)/(2.*(alpha(i)+alpha(j))**(1+(dimen/2.)))
+        Tpre=alpha(i)*alpha(j)*(2*pi)**(dimen/2.)/(2.*(alpha(i)+alpha(j))&
+            **(1+(dimen/2.)))
         Tsum=0d0
         do k=1,Dimen
-            Tsum=Tsum+(omega(k)-(alpha(i)*alpha(j)*omega(k)**2*(q(k,j)-q(k,i))**2&
-                /(alpha(i)+alpha(j))))
+            Tsum=Tsum+(omega(k)-(alpha(i)*alpha(j)*omega(k)**2&
+                *(q(k,j)-q(k,i))**2/(alpha(i)+alpha(j))))
         enddo
         Tmat(i,j)=Tpre*(prod_omega)**(-0.5)*Tsum
         Tmat(j,i)=Tmat(i,j)
@@ -379,6 +367,9 @@ Hmat=Hmat+Tmat
 Hmat=Hmat*Lmat
 S1mat=Smat
 S1mat=S1mat*Lmat
+!==============================================================================!
+!                       Generalized Eigenvalue Problem                         !
+!==============================================================================!
 itype=1
 eigenvalues=0d0
 !==============================================================================!
@@ -392,7 +383,8 @@ write(*,*) 'info ==>', info
 open(unit=18,file='eigenvalues.dat')
 !write(*,*) 'Computed,                   True Energy,                    Error'
 do i=1,NG
-    write(18,*) eigenvalues(i), ((i-1)+.5)*omega(1),((eigenvalues(i) - ((i-1)+.5)*omega(1))/(((i-1)+.5)*omega(1)))  
+    write(18,*) eigenvalues(i), ((i-1)+.5)*omega(1),&
+        ((eigenvalues(i) - ((i-1)+.5)*omega(1))/(((i-1)+.5)*omega(1)))  
 enddo
 close(18)
 !==============================================================================!
