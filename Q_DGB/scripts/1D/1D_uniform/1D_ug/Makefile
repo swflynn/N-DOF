@@ -11,6 +11,7 @@ S_std:
 
 1D:
 	$(FC) -c 1D_ug.f90 -llapack
+#	$(FC) -c -g -O0 -Wall -pedantic -fcheck=all -fbacktrace 1D_ug.f90 -llapack
 
 main:
 	$(FC) -O 1D_ug.o sobol.o sobol_stdnormal.o -llapack
