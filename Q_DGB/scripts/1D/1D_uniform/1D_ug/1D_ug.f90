@@ -10,8 +10,6 @@
 !       8 November 2018
 !    Author:
 !       Shane Flynn 
-! IAMHERE cleaned code, but need ot compare to working 2D and optimize before
-!pushing to github
 !==============================================================================!
 module dgb_groundstate
 implicit none
