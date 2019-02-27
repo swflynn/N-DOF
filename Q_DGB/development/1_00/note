@@ -1,6 +1,0 @@
-11-9-18 ==> Code seems to be working for 1D calculations
-moving on to 2D case, if we confirm there we will move on and place this into scripts
-
-Code uses constant alpha parameter and uniform grid definede in the input file
-Also uses regularization to improve ill-conditioning of the overlap matrix
-Use new derivations (in terms of normal mode coordinates) to define the code
