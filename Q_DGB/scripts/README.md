@@ -9,8 +9,13 @@ The remainder of the project uses the normal-mode coordinates formulation.
 These codes are for reference only, and would need to be corrected before implementation. 
 
 ### 1D-Potential:
+Simple 1-Dimensional formulation as a proof of principle example.
+Codes for both a uniform grid and a quasi-random grid, and associated evaluation of the eigenvalue problem. 
 
 ### 2D-Potential:
+Simple 2-Dimensional formulation as a proof of principle example.
+Codes for both a uniform grid and a quasi-random grid, and associated evaluation of the eigenvalue problem. 
+Both seperable and non-seperable potential energies are available, and a simple implementation of regularization is available (to deal with ill-conditioning in the overlap matrix). 
 
 # Open Source Codes
 The following codes have been useful during this project.
