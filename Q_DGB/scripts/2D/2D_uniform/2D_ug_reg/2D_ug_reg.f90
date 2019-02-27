@@ -3,8 +3,9 @@
 !==============================================================================!
 !       Discussion:
 !DGB analysis for 2D seperable potential (hard-coded) 
-!Assumes normal mode coordinates for analysis, Integration with Uniform Grid 
+!Assumes normal mode coordinates for analysis, Integration with Uniform Grid
 !Gaussian Widths (alpha) provided as input parameter
+!Regularization implemented to address ill-condition of overlap matrix 
 !==============================================================================!
 !       Modified:
 !   11 November 2018
@@ -16,8 +17,8 @@ implicit none
 !==============================================================================!
 !                           Global Paramaters
 !==============================================================================!
-double precision,parameter::Hmass=1d0
-double precision,parameter::pi=4.*atan(1d0)
+double precision, parameter :: Hmass=1d0
+double precision, parameter :: pi=4.*atan(1d0)
 !==============================================================================!
 !                               Global Variables 
 !==============================================================================!
@@ -25,9 +26,9 @@ double precision,parameter::pi=4.*atan(1d0)
 !Natoms             ==> Number of atoms 
 !Dimen              ==> Dimensionality 
 !==============================================================================!
-integer::Natoms, Dimen
-character(len=2),allocatable::atom_type(:)
-double precision,allocatable::mass(:),sqrt_mass(:)
+integer :: Natoms, Dimen
+character(len=2), allocatable :: atom_type(:)
+double precision, allocatable :: mass(:),sqrt_mass(:)
 !==============================================================================!
 !                           Begin Module 
 !==============================================================================!
@@ -49,20 +50,20 @@ end function Atom_Mass
 subroutine Toy_Potential(x,energies)
 !==============================================================================!
 !       Discussion:
-!Hard-Coded Potential Energy
+!Hard-coded Potential for Testing Purposes
 !V:=0.5*(x)^2+0.5*(y)^2
 !==============================================================================!
 implicit none
-double precision::x(Dimen),energies
+double precision :: x(Dimen),energies
 energies=0.5*x(1)**2+0.5*x(2)**2 
-!write(*,*) 'Energy from Toy_Potential Subroutine ==> ', energies
+!write(*,*) 'Energy from Toy_Potential Subroutine ==> ' energies
 end subroutine Toy_Potential
 !==============================================================================!
 subroutine Toy_Force(x,forces)
 !==============================================================================!
 !       Discussion:
 !Returns the Forces associated with Toy_Potential Subroutine
-!Forces are hard-coded based on Toy_Potential
+!Forces are hard-coded for the toy_potential 
 !==============================================================================!
 implicit none
 integer::i
@@ -76,11 +77,11 @@ subroutine Toy_Hessian(x,Hess_Mat)
 !==============================================================================!
 !       Discussion:
 !Numerically computed Hessian using forces from Toy_Force Subroutine
-!Hessian is defined for the minimum (requires minimum configuration xyz)
+!Hessian is defined at the minimum (requires minimum configuration)
 !       Variables:
 !s          ==> Perturbation parameter for computing Hessian
 !Hess_Mat   ==> (Dimen,Dimen); Symmetrized Mass-Scaled Hessian
-!x          ==> (Dimen); Minimum Configuration (xyz)
+!x          ==> (Dimen); Minimum Configuration
 !==============================================================================!
 implicit none 
 integer::i,j
@@ -91,7 +92,7 @@ r=x
 call Toy_Force(r,force0)
 do i=1,Dimen
     r(i)=x(i)+s
-    call Toy_Force(r,force)
+    call Toy_Force(r, force)
     r(i)=x(i)
     do j=1,Dimen
         Hess_Mat(i,j)=(force0(j)-force(j))/s
@@ -121,7 +122,7 @@ subroutine Frequencies_From_Hess(Dimen,Hess,omega,U)
 !U      ==> (Dimen,Dimen); Hessian Eigenvectors
 !       LLAPACK (dsyev):
 !v      ==> Compute both Eigenvalues and Eigenvectors
-!u      ==> Upper-Triangle of matrix
+!u      ==> Use Upper-Triangle of matrix
 !==============================================================================!
 implicit none
 integer::i,info,lwork,Dimen
@@ -134,7 +135,7 @@ call dsyev('v','u',Dimen,U,Dimen,omega,work,lwork,info)
 write(*,*) 'Frequencies from the Hessian:'
 do i=Dimen,1,-1
     omega(i)=sign(sqrt(abs(omega(i))),omega(i))
-    write(*,*) omega(i), 'normalized==1?',sum(U(:,i)**2)
+    write(*,*) omega(i), 'normalized = 1?',sum(U(:,i)**2)
 enddo
 end subroutine Frequencies_From_Hess
 !==============================================================================!
@@ -146,19 +147,19 @@ use dgb_groundstate
 !==============================================================================!
 !==============================================================================!
 !               Discussion:
-!coord_in       ==> Input Geometry File-Name (xyz file) 
+!coord_in       ==> Input Water Geometry 
 !NG_1D          ==> Number of Gaussians Along a Dimension
 !NG             ==> Total Number of Gaussians 
 !Nsobol         ==> Number of Sobol Points for numerical integration
-!ii, skip       ==> Integer(kind=8): Necessary for Sobol Module
-!q0             ==> (Dimen): Input Geometry coordinates (xyz)
-!r              ==> (Dimen,NG): Gaussian Centers 
+!ii, skip       ==> Integer(kind=8) necessary for Sobol Module
+!q0             ==> (Dimen): Input Geometry coordinates (x,y,z)
+!r              ==> (Dimen,NG): Gaussian Centers
 !r2             ==> (Dimen,Nsobol): ij-th Gaussian Coordinate (potential)
 !force          ==> (Dimen): Forces. "Toy_Force Subroutine"
 !Hess           ==> (Dimen,Dimen): Mass-Scaled Hessian. "Toy_Hessian Subroutine"
 !omega          ==> (Dimen): Frequencies (Eigenvalues). "Freq_Hess Subroutine"
 !U              ==> (Dimen,Dimen): Hessian Eigenvectors. "Freq_Hess Subroutine"
-!z              ==> (Dimen,Nsobol): Quasi-Random Sequence for Integration 
+!z              ==> (Dimen,Nsobol): Quasi-Random Sequence for Integration
 !Smat           ==> (NG,NG): Overlap Matrix
 !Tmat           ==> (NG,NG): Kinetic Energy Matrix
 !Vmat           ==> (NG,NG): Potential Energy Matrix
@@ -167,19 +168,20 @@ use dgb_groundstate
 !lambda         ==> (NG): Eigenvalues of the Overlap Matrix
 !r_ij           ==> ij-th Gaussian Center
 !E0             ==> Minimum Configuration Potential Energy
+!h_par          ==> Regularizatoin CutOff parameter
 !==============================================================================!
 implicit none
 character(len=50)::coord_in
 integer::NG_1D,NG,Nsobol,i,j,k,l,n,counter
 integer*8::ii,skip,skip2
-double precision::E0,pot_ene,alpha_par,lower,upper,s_sum
+double precision::E0,pot_ene,alpha_par,lower,upper,h_par,s_sum
 !==============================================================================!
-double precision,allocatable::q0(:),force(:),points(:),r(:,:),r2(:),alpha(:)
+double precision,allocatable::q0(:),force(:),r(:,:),r2(:),eigenvalues(:)
 double precision,allocatable::Hess(:,:),omega(:),U(:,:),z(:,:),Smat(:,:)
-double precision,allocatable::W(:,:),lambda(:),Tmat(:,:),Vmat(:,:),Hmat(:,:)
-double precision,allocatable::eigenvalues(:),r_ij(:)
+double precision,allocatable::alpha(:),Tmat(:,:),Vmat(:,:),Hmat(:,:)
+double precision,allocatable::W(:,:),lambda(:),r_ij(:),points(:)
 !==============================================================================!
-!                           LLAPACK dsygv variables                            !
+!                           dsygv variables                                    !
 !==============================================================================!
 integer::itype,info,lwork
 double precision,allocatable::work(:)
@@ -192,23 +194,25 @@ read(*,*) Nsobol
 read(*,*) alpha_par
 read(*,*) lower 
 read(*,*) upper
+read(*,*) h_par
 NG=NG_1D**2
 skip=NG
 skip2=Nsobol
-write(*,*) 'Test 1; Successfully Read Input Data File'
+write(*,*) 'Test 1; Successfully Read Input Data File!'
 !==============================================================================!
 !                         Set Input Water Geometry 
 !==============================================================================!
 open(16,File=coord_in)
 read(16,*) Natoms
 read(16,*) 
-Dimen=2*Natoms      !2D Test Case (dim:=2Natoms) 
+Dimen=2*Natoms 
+write(*,*) 'Dimensionality ==> ', Dimen
 !==============================================================================!
 allocate(atom_type(Natoms),mass(Natoms),sqrt_mass(Dimen),q0(Dimen),force(Dimen))
 allocate(Hess(Dimen,Dimen),omega(Dimen),U(Dimen,Dimen),z(Dimen,Nsobol))
 allocate(r(Dimen,NG),alpha(NG),Smat(NG,NG),eigenvalues(NG),points(NG_1D))
-allocate(Tmat(NG,NG),Vmat(NG,NG),Hmat(NG,NG),r2(Dimen),W(NG,NG),lambda(NG))
-allocate(r_ij(Dimen))
+allocate(Tmat(NG,NG),Vmat(NG,NG),Hmat(NG,NG),r2(Dimen),W(NG,NG),r_ij(Dimen))
+allocate(lambda(NG))
 !==============================================================================!
 !                         Input Configuration Energy
 !==============================================================================!
@@ -217,7 +221,7 @@ do i=1,Natoms
     mass(i)=Atom_mass(atom_type(i))
     sqrt_mass(2*i-1:2*i)=sqrt(mass(i))
 enddo
-close(16)
+close(66)
 call toy_potential(q0,E0)
 write(*,*) 'E0 ==> ', E0
 !==============================================================================!
@@ -225,7 +229,7 @@ write(*,*) 'E0 ==> ', E0
 !==============================================================================!
 call Toy_Hessian(q0, Hess)
 call Frequencies_From_Hess(Dimen,Hess,omega,U)
-write(*,*) 'Test 2; Successfully Computed Hessian'
+write(*,*) 'Test 2; Successfully computed Hessian'
 !==============================================================================!
 !                 Generate Gaussian Centers with Uniform Grid  
 !==============================================================================!
@@ -245,10 +249,10 @@ do i=1,NG
     write(17,*) r(:,i)
 enddo
 close(17)
-write(*,*) 'Test 3; Successfully Generated Gaussian Centers'
+write(*,*) 'Test 3; Successfully computed Uniform Grid Points'
 !==============================================================================!
 !                       Generate Alpha Scaling 
-!Input Paramater (same for every dimension)
+! Input Paramater (the same across all dimensions)
 !==============================================================================!
 alpha=alpha_par
 !==============================================================================!
@@ -262,22 +266,46 @@ do i=1,NG
         Smat(j,i)=Smat(i,j)
     enddo
 enddo
-write(*,*) 'Test 4; Successfully Computed Overlap Matrix'
+write(*,*) 'Test 4; Successfully computed Overlap Matrix'
 !==============================================================================!
 !                   Check to see if S is positive definite
-!IF this is removed, you must allocate llapack arrays before Hamiltonian 
-!Using positive-definite eigensolver, check llapack for info meaning 
+!If this is removed, you need to allocate llapack arrays before Hamiltonian 
 !==============================================================================!
 W=Smat
 lwork=max(1,3*NG-1)
 allocate(work(max(1,lwork)))
 call dsyev('v','u',NG,W,NG,lambda,work,Lwork,info)
-write(*,*) 'Info (Overlap Matrix) ===>', info
+write(*,*) 'info (Overlap Matrix) ===>', info
 open(unit=18,file='overlap_eigenvalues.dat')
 do i=1,NG
     write(18,*) lambda(i)
 enddo
 close(18)
+!==============================================================================!
+!                       Compute Reglarized S
+! Let W be the eigenvectors of S T(NG,NG),lambda(NG) the eigenvalues
+!==============================================================================!
+h_par=h_par*lambda(NG)
+write(*,*) 'hpar', h_par
+counter=0
+do i=1,NG
+    if(lambda(i)<h_par) then
+        lambda(i)=h_par
+        counter=counter+1
+    endif
+enddo
+do i=1,NG
+   do j=1,NG
+      Smat(i,j)=sum(W(i,:)*W(j,:)*lambda(:))        
+   enddo
+enddo
+write(*,*) 'Regularization has replaced ', counter, 'overlap eigenvalues'
+open(unit=19,file='overlap_regularized.dat')
+do i=1,NG
+    write(19,*) lambda(i)
+enddo
+close(19)
+write(*,*) 'Test 5; Successfully Regularized Overlap Matrix'
 !==============================================================================!
 !                           Kinetic Matrix (T)
 !==============================================================================!
@@ -289,7 +317,7 @@ do i=1,NG
         Tmat(j,i)=Tmat(i,j)
     enddo
 enddo
-write(*,*) 'Test 6; Successfully Computed Kinetic Matrix'
+write(*,*) 'Test 6; Successfully computed Kinetic Matrix'
 !==============================================================================!
 !                   Generate Sequence For Evaluating Potential
 !==============================================================================!
@@ -301,7 +329,7 @@ enddo
 !==============================================================================!
 Vmat=0d0
 do i=1,NG
-    do j=i,NG
+   do j=i,NG
       r_ij(:)=(alpha(i)*r(:,i)+alpha(j)*r(:,j))/(alpha(i)+alpha(j))
         do l=1,Nsobol
             r2(:)=r_ij(:)+z(:,l)/sqrt(omega(:)*(alpha(i)+alpha(j)))
@@ -327,18 +355,18 @@ eigenvalues=0d0
 !allocate(work(max(1,lwork)))
 !==============================================================================!
 CALL dsygv(itype,'n','u',NG,Hmat,NG,Smat,NG,eigenvalues,work,Lwork,info) 
-open(unit=19,file='eigenvalues.dat')
+open(unit=20,file='eigenvalues.dat')
 do i=1,NG
-    write(19,*) eigenvalues(i)
-enddo
-close(19)
-open(unit=20,file='theory.dat')
-do i=0,NG
-    do j=0,NG
-        write(20,*) (0.5+i)*omega(1)+(0.5+j)*omega(2)
-    enddo
+    write(20,*) eigenvalues(i)
 enddo
 close(20)
+open(unit=21,file='true.dat')
+do i=0,NG
+    do j=0,NG
+        write(21,*) (0.5+i)*omega(1) + (0.5+j)*omega(2)
+    enddo
+enddo
+close(21)
 !==============================================================================!
 !                               output file                                    !
 !==============================================================================!
@@ -351,6 +379,8 @@ write(90,*) 'N_gauss ==>', NG
 write(90,*) 'N_Sobol ==>', Nsobol
 write(90,*) 'omega ==>', omega(1), omega(2)
 write(90,*) 'Alpha Parameter ==>', alpha_par
+write(90,*) 'Regularization parameter ==>', h_par/lambda(NG)
+write(90,*) 'Regularization replaced  ==>', counter, 'eigenvalues'
 close(90)
 write(*,*) 'Final Test; Hello Universe!' 
 end program DGB_2D

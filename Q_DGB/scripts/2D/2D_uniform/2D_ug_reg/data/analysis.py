@@ -1,4 +1,4 @@
-# Have not cleaned this plotting code, fix when I make the writeup 2-24-19
+# Data analysis script should be cleaned up, did not edit!!!!
 # Python script to compute error for 2D seperable Eigenvalues
 
 import pandas as pd
