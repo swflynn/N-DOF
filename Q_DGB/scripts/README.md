@@ -1,6 +1,9 @@
 # Scripts
 Collection of various programs written during project development.
 
+### Grids:
+Different grid generation methods for numerical integration. 
+
 ### Q-Space-Calculations:
 Original formulation of the project using coordinate space (opposed to normal mode space).
 The 1-Dimensional calculation gives accurate results, however, the two-dimensional case (and subsequentally the equations) are off by a factor that was never corrected.
