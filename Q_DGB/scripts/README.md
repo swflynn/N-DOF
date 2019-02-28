@@ -20,6 +20,12 @@ Simple 2-Dimensional formulation as a proof of principle example.
 Codes for both a uniform grid and a quasi-random grid, and associated evaluation of the eigenvalue problem. 
 Both seperable and non-seperable potential energies are available, and a simple implementation of regularization is available (to deal with ill-conditioning in the overlap matrix). 
 
+### Monomer:
+Implementation for a single water monomer.
+Solves the generalized eigenvalue problem using a GDB basis, numerical integrals computed using QMC-methods. 
+Tested with TIP4P and MBPOL PES and associated minimized water geomoetries. 
+
+
 # Open Source Codes
 The following codes have been useful during this project.
 Refer to the original source code and documentation for more details.
